@@ -8,6 +8,18 @@
 # Ensure DISPLAY is set
 export DISPLAY="${DISPLAY:-:0}"
 
+# 0. Sanity Checks: Ensure rofi is installed
+if ! command -v rofi >/dev/null 2>&1; then
+    notify-send -u critical -i error "Display Mirror Error" "Rofi is not installed!\nPlease run: sudo pacman -S rofi" 2>/dev/null || true
+    echo "Error: rofi is not installed. Run: sudo pacman -S rofi" >&2
+    exit 1
+fi
+
+# Warn if running under Wayland (xrandr only manages physical ports on X11)
+if [ "$XDG_SESSION_TYPE" = "wayland" ] || [ -n "$WAYLAND_DISPLAY" ]; then
+    notify-send -u critical -i video-display "Display Mirror Warning" "You are in Wayland. xrandr requires X11 (i3wm) to see physical HDMI ports!" 2>/dev/null || true
+fi
+
 # 1. Detect primary / internal display
 primary=$(xrandr --query 2>/dev/null | grep -E " connected (primary )?[0-9]+x[0-9]+" | awk '{print $1}' | head -n1)
 if [ -z "$primary" ]; then
