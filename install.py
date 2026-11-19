@@ -185,6 +185,7 @@ COMPONENTS = [
             (".config/fish", ".config/fish"),
             (".config/fastfetch", ".config/fastfetch"),
             ("bin/update-cream", ".local/bin/update-cream"),
+            ("bin/cream-settings", ".local/bin/cream-settings"),
         ],
         "pkgs": ["alacritty", "fish", "fastfetch"],
     },
@@ -199,11 +200,12 @@ COMPONENTS = [
     },
     {
         "id": "widgets",
-        "name": "Desktop Widgets",
-        "desc": "SONE Music Player + Task Monitor",
+        "name": "Desktop Widgets & Settings",
+        "desc": "SONE Music Player, Task Monitor & Control Center",
         "links": [
             (".config/sone_widget", ".config/sone_widget"),
             (".config/perf_widget", ".config/perf_widget"),
+            (".config/cream_settings", ".config/cream_settings"),
         ],
         "pkgs": ["python-pyqt5", "python-psutil", "playerctl", "xdotool", "xorg-xprop"],
     },

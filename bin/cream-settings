@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#   cream-settings: Wu-Tang Clan Rice Control Center Launcher
+# ==============================================================================
+
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Prefer ~/.config/cream_settings/settings_gui.py, fallback to repository
+if [ -f "${HOME}/.config/cream_settings/settings_gui.py" ]; then
+    exec python3 "${HOME}/.config/cream_settings/settings_gui.py" "$@"
+elif [ -f "${DOTFILES_DIR}/.config/cream_settings/settings_gui.py" ]; then
+    exec python3 "${DOTFILES_DIR}/.config/cream_settings/settings_gui.py" "$@"
+else
+    echo "[!] Error: settings_gui.py not found." >&2
+    exit 1
+fi

@@ -46,6 +46,7 @@ chmod +x "${DOTFILES_DIR}"/.config/i3/scripts/* 2>/dev/null || true
 chmod +x "${DOTFILES_DIR}"/.config/polybar/*.sh 2>/dev/null || true
 chmod +x "${DOTFILES_DIR}"/.config/sone_widget/*.sh 2>/dev/null || true
 chmod +x "${DOTFILES_DIR}"/.config/perf_widget/*.sh 2>/dev/null || true
+chmod +x "${DOTFILES_DIR}"/.config/cream_settings/*.py 2>/dev/null || true
 echo -e "${GOLD}│${RESET}  ${GREEN}[OK] Permissions verified (+x).${RESET}"
 
 # 3. Refresh symlinks via install.py
