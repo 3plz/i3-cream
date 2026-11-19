@@ -39,6 +39,7 @@ bindsym $MOD+Shift+r restart
 bindsym --release $MOD+q kill
 bindsym $ALT+a floating toggle 
 bindsym $ALT+f fullscreen toggle
+bindsym $ALT+F7 exec --no-startup-id ~/.config/i3/scripts/display_mirror.sh
 
 # Binds 
 bindsym $MOD+Return exec $TERM

@@ -118,6 +118,7 @@
 | `Super + Q` | Close focused window | `kill` |
 | `Super + Space` | Toggle floating mode | `floating toggle` |
 | `Alt + Shift` | Switch keyboard layout | `us,ru` toggle |
+| `Alt + F7` | Mirror display / Capture card menu | `~/.config/i3/scripts/display_mirror.sh` |
 | `Print` | Screenshot tool | `flameshot gui` |
 | `Super + 1..9` | Switch workspace | Workspace 1–9 |
 | `Super + Shift + 1..9` | Move window to workspace | Move to 1–9 |
