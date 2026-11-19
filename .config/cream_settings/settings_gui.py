@@ -20,7 +20,7 @@ import psutil
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton, QVBoxLayout,
     QHBoxLayout, QFrame, QStackedWidget, QScrollArea, QGridLayout,
-    QCheckBox, QSizePolicy, QMessageBox, QFileDialog
+    QCheckBox, QSizePolicy, QMessageBox, QFileDialog, QComboBox, QDialog
 )
 from PyQt5.QtCore import Qt, QTimer, QSize, pyqtSignal
 from PyQt5.QtGui import QPixmap, QFont, QColor, QPalette, QIcon, QPainter, QBrush, QPen
@@ -162,6 +162,35 @@ QCheckBox::indicator:hover {
 }
 QCheckBox::indicator:checked {
     background: #FFB800;
+    border: 1px solid #FFB800;
+}
+
+/* Dialogs & Comboboxes */
+QDialog {
+    background-color: #0C0C0C;
+    border: 2px solid #FFB800;
+}
+
+QComboBox {
+    background-color: #161616;
+    color: #FFFFFF;
+    border: 1px solid #333333;
+    padding: 6px 10px;
+    font-family: 'Terminess Nerd Font', 'Silkscreen', monospace;
+    font-size: 11px;
+}
+QComboBox:hover, QComboBox:focus {
+    border: 1px solid #FFB800;
+}
+QComboBox::drop-down {
+    border: none;
+    width: 22px;
+}
+QComboBox QAbstractItemView {
+    background-color: #141414;
+    color: #E0E0E0;
+    selection-background-color: #FFB800;
+    selection-color: #0C0C0C;
     border: 1px solid #FFB800;
 }
 """
@@ -771,63 +800,427 @@ done
 
 
 # -----------------------------------------------------------------------------
-# Display & System Quick Actions Tab
+# Display Configuration Classes
+# -----------------------------------------------------------------------------
+def parse_xrandr_query(output):
+    """Parse xrandr --query text into a dictionary of connected monitors."""
+    monitors = {}
+    current = None
+    for line in output.splitlines():
+        m_conn = re.match(
+            r'^([\w\-]+)\s+(connected|disconnected)\s*(primary)?\s*([0-9]+x[0-9]+\+[0-9]+\+[0-9]+)?\s*(left|right|inverted)?',
+            line
+        )
+        if m_conn:
+            name, status, primary, geom, rot = m_conn.groups()
+            if status == 'connected':
+                current = name
+                res, x, y = None, 0, 0
+                if geom:
+                    parts = geom.replace('+', 'x').split('x')
+                    res = f"{parts[0]}x{parts[1]}"
+                    x, y = int(parts[2]), int(parts[3])
+                monitors[name] = {
+                    'name': name,
+                    'connected': True,
+                    'primary': bool(primary),
+                    'active': bool(geom),
+                    'current_res': res,
+                    'current_rate': None,
+                    'preferred_res': None,
+                    'preferred_rate': None,
+                    'x': x,
+                    'y': y,
+                    'rotation': rot if rot else 'normal',
+                    'modes': {},
+                    'placement': None
+                }
+            else:
+                current = None
+            continue
+
+        if current and line.startswith('   '):
+            parts = line.strip().split()
+            if not parts:
+                continue
+            mode_res = parts[0]
+            rates = []
+            for r in parts[1:]:
+                is_current = '*' in r
+                is_preferred = '+' in r
+                clean_r = r.rstrip('*+ ')
+                try:
+                    float(clean_r)
+                    rates.append(clean_r)
+                    if is_current:
+                        monitors[current]['current_rate'] = clean_r
+                    if is_preferred and not monitors[current].get('preferred_res'):
+                        monitors[current]['preferred_res'] = mode_res
+                        monitors[current]['preferred_rate'] = clean_r
+                except ValueError:
+                    pass
+            if mode_res not in monitors[current]['modes']:
+                monitors[current]['modes'][mode_res] = []
+            monitors[current]['modes'][mode_res].extend(rates)
+
+    if not monitors:
+        # Fallback display for testing / headless environments
+        monitors = {
+            "eDP-1": {
+                "name": "eDP-1",
+                "connected": True,
+                "primary": True,
+                "active": True,
+                "current_res": "1920x1080",
+                "current_rate": "60.00",
+                "preferred_res": "1920x1080",
+                "preferred_rate": "60.00",
+                "x": 0,
+                "y": 0,
+                "rotation": "normal",
+                "modes": {
+                    "1920x1080": ["60.00", "59.94"],
+                    "1600x900": ["60.00"],
+                    "1280x720": ["60.00"]
+                },
+                "placement": None
+            }
+        }
+    return monitors
+
+
+class MonitorBox(QFrame):
+    clicked = pyqtSignal(str)
+
+    def __init__(self, monitor_data, number, is_selected=False, parent=None):
+        super().__init__(parent)
+        self.data = monitor_data
+        self.number = number
+        self.is_selected = is_selected
+        self.setCursor(Qt.PointingHandCursor)
+        self.setFixedSize(145, 92)
+        self.init_ui()
+
+    def init_ui(self):
+        self.update_style()
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(10, 8, 10, 8)
+        layout.setSpacing(4)
+
+        top_row = QHBoxLayout()
+        num_lbl = QLabel(str(self.number), self)
+        num_lbl.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-size: 13px; font-weight: bold;")
+        top_row.addWidget(num_lbl)
+
+        top_row.addStretch()
+
+        if self.data.get("primary", False):
+            badge = QLabel("MAIN", self)
+            badge.setStyleSheet("color: #0C0C0C; background: #FFB800; font-family: 'Silkscreen', monospace; font-size: 8px; font-weight: bold; padding: 1px 4px;")
+            top_row.addWidget(badge)
+        elif not self.data.get("active", False):
+            badge = QLabel("OFF", self)
+            badge.setStyleSheet("color: #888888; background: #222222; font-family: 'Silkscreen', monospace; font-size: 8px; font-weight: bold; padding: 1px 4px;")
+            top_row.addWidget(badge)
+
+        layout.addLayout(top_row)
+
+        name_lbl = QLabel(self.data["name"], self)
+        name_lbl.setStyleSheet("color: #FFFFFF; font-weight: bold; font-size: 11px;")
+        layout.addWidget(name_lbl)
+
+        if self.data.get("active", False):
+            res_str = self.data.get("current_res") or "Auto"
+            rate_str = f"{float(self.data['current_rate']):.0f}Hz" if self.data.get("current_rate") else ""
+            info_text = f"{res_str} {rate_str}".strip()
+        else:
+            info_text = "Disabled"
+
+        info_lbl = QLabel(info_text, self)
+        info_lbl.setStyleSheet("color: #888888; font-size: 9.5px;")
+        layout.addWidget(info_lbl)
+
+    def update_style(self):
+        if self.is_selected:
+            self.setStyleSheet("background-color: #201A0E; border: 2px solid #FFB800;")
+        elif not self.data.get("active", False):
+            self.setStyleSheet("background-color: #0E0E0E; border: 1px dashed #444444;")
+        else:
+            self.setStyleSheet("background-color: #141414; border: 1px solid #333333;")
+
+    def set_selected(self, selected):
+        self.is_selected = selected
+        self.update_style()
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit(self.data["name"])
+
+
+class RevertCountdownDialog(QDialog):
+    def __init__(self, revert_callback, keep_callback, parent=None, timeout=15):
+        super().__init__(parent)
+        self.setWindowTitle("Confirm Display Settings")
+        self.setFixedSize(420, 190)
+        self.setStyleSheet(QSS_STYLE)
+        self.setWindowFlags(Qt.Dialog | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+
+        self.revert_callback = revert_callback
+        self.keep_callback = keep_callback
+        self.time_left = timeout
+        self.confirmed = False
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 20, 24, 20)
+        layout.setSpacing(12)
+
+        title = QLabel("KEEP DISPLAY SETTINGS?", self)
+        title.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-size: 13px; font-weight: bold;")
+        layout.addWidget(title)
+
+        desc = QLabel("Do you want to keep these display settings?\nIf screen goes blank or unreadable, it will automatically revert.", self)
+        desc.setStyleSheet("color: #CCCCCC; font-size: 11px;")
+        desc.setWordWrap(True)
+        layout.addWidget(desc)
+
+        self.timer_lbl = QLabel(f"Reverting in {self.time_left} seconds...", self)
+        self.timer_lbl.setStyleSheet("color: #E53935; font-family: 'Silkscreen', monospace; font-size: 10px; font-weight: bold;")
+        layout.addWidget(self.timer_lbl)
+
+        btn_row = QHBoxLayout()
+        self.keep_btn = QPushButton("Keep Changes", self)
+        self.keep_btn.setProperty("class", "PrimaryBtn")
+        self.keep_btn.clicked.connect(self.on_keep)
+        btn_row.addWidget(self.keep_btn)
+
+        self.revert_btn = QPushButton(f"Revert ({self.time_left}s)", self)
+        self.revert_btn.setProperty("class", "SecondaryBtn")
+        self.revert_btn.clicked.connect(self.on_revert)
+        btn_row.addWidget(self.revert_btn)
+
+        layout.addLayout(btn_row)
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.on_tick)
+        self.timer.start(1000)
+
+    def on_tick(self):
+        self.time_left -= 1
+        if self.time_left <= 0:
+            self.timer.stop()
+            self.on_revert()
+        else:
+            self.timer_lbl.setText(f"Reverting in {self.time_left} seconds...")
+            self.revert_btn.setText(f"Revert ({self.time_left}s)")
+
+    def on_keep(self):
+        self.confirmed = True
+        self.timer.stop()
+        self.keep_callback()
+        self.accept()
+
+    def on_revert(self):
+        self.confirmed = False
+        self.timer.stop()
+        self.revert_callback()
+        self.reject()
+
+    def closeEvent(self, event):
+        if not self.confirmed:
+            self.on_revert()
+        event.accept()
+
+
+# -----------------------------------------------------------------------------
+# Display Configuration & Arrangement Tab
 # -----------------------------------------------------------------------------
 class DisplayTab(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.monitors = self.query_monitors()
+        self.selected_monitor = self.get_initial_selected_monitor()
+        self.monitor_boxes = {}
+        self.previous_cmd = None
         self.init_ui()
 
-    def init_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 20, 24, 20)
-        layout.setSpacing(16)
+    def get_initial_selected_monitor(self):
+        for name, m in self.monitors.items():
+            if m.get("primary"):
+                return name
+        return list(self.monitors.keys())[0] if self.monitors else None
 
-        title = QLabel("DISPLAYS & SYSTEM ACTIONS", self)
+    def query_monitors(self):
+        try:
+            env = dict(os.environ)
+            if "DISPLAY" not in env or not env["DISPLAY"]:
+                env["DISPLAY"] = ":0"
+            out = subprocess.check_output(["xrandr", "--query"], env=env, stderr=subprocess.DEVNULL).decode("utf-8")
+            return parse_xrandr_query(out)
+        except Exception:
+            return parse_xrandr_query("")
+
+    def init_ui(self):
+        outer_layout = QVBoxLayout(self)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+
+        scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        scroll.setStyleSheet("QScrollArea { border: none; background-color: #0C0C0C; }")
+
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(24, 20, 24, 20)
+        layout.setSpacing(14)
+
+        title = QLabel("DISPLAY CONFIGURATION & ARRANGEMENT", container)
         title.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-size: 13px; font-weight: bold; letter-spacing: 1px;")
         layout.addWidget(title)
 
-        # Displays Card
-        disp_card = QFrame(self)
-        disp_card.setProperty("class", "CardFrame")
-        dc_layout = QVBoxLayout(disp_card)
-        dc_layout.setContentsMargins(16, 14, 16, 14)
-        dc_layout.setSpacing(10)
+        # 1. Visual Canvas Card
+        self.canvas_card = QFrame(container)
+        self.canvas_card.setProperty("class", "CardFrame")
+        cc_layout = QVBoxLayout(self.canvas_card)
+        cc_layout.setContentsMargins(14, 12, 14, 12)
+        cc_layout.setSpacing(10)
 
-        dc_title = QLabel("Connected Monitors & Video Outputs", disp_card)
-        dc_title.setStyleSheet("color: #FFFFFF; font-weight: bold; font-size: 13px;")
-        dc_layout.addWidget(dc_title)
+        cc_title = QLabel("Rearrange Displays (Click any display to configure)", self.canvas_card)
+        cc_title.setStyleSheet("color: #888888; font-size: 11px; font-weight: bold;")
+        cc_layout.addWidget(cc_title)
 
-        monitors = self.detect_monitors()
-        for mon in monitors:
-            lbl = QLabel(f"• {mon}", disp_card)
-            lbl.setStyleSheet("color: #A0A0A0; font-size: 12px;")
-            dc_layout.addWidget(lbl)
+        self.boxes_row = QHBoxLayout()
+        self.boxes_row.setSpacing(12)
+        self.rebuild_monitor_boxes()
+        cc_layout.addLayout(self.boxes_row)
 
-        # Capture card button
-        cc_layout = QHBoxLayout()
-        cc_btn = QPushButton("Launch Capture Card Mirroring (Alt + F7)", disp_card)
-        cc_btn.setProperty("class", "PrimaryBtn")
-        cc_btn.clicked.connect(self.launch_display_mirror)
-        cc_layout.addWidget(cc_btn)
-        cc_layout.addStretch()
-        dc_layout.addLayout(cc_layout)
+        # Preset arrangement buttons
+        preset_row = QHBoxLayout()
+        preset_row.setSpacing(8)
 
-        layout.addWidget(disp_card)
+        btn_extend_r = QPushButton("Extend Right", self.canvas_card)
+        btn_extend_r.setProperty("class", "SecondaryBtn")
+        btn_extend_r.clicked.connect(self.preset_extend_right)
+        preset_row.addWidget(btn_extend_r)
 
-        # Quick Reloads Card
-        act_card = QFrame(self)
+        btn_extend_l = QPushButton("Extend Left", self.canvas_card)
+        btn_extend_l.setProperty("class", "SecondaryBtn")
+        btn_extend_l.clicked.connect(self.preset_extend_left)
+        preset_row.addWidget(btn_extend_l)
+
+        btn_mirror = QPushButton("Mirror All", self.canvas_card)
+        btn_mirror.setProperty("class", "SecondaryBtn")
+        btn_mirror.clicked.connect(self.preset_mirror)
+        preset_row.addWidget(btn_mirror)
+
+        btn_id = QPushButton("Identify", self.canvas_card)
+        btn_id.setProperty("class", "SecondaryBtn")
+        btn_id.clicked.connect(self.identify_displays)
+        preset_row.addWidget(btn_id)
+
+        preset_row.addStretch()
+        cc_layout.addLayout(preset_row)
+
+        layout.addWidget(self.canvas_card)
+
+        # 2. Selected Display Controls Card
+        self.detail_card = QFrame(container)
+        self.detail_card.setProperty("class", "CardFrame")
+        self.dc_layout = QVBoxLayout(self.detail_card)
+        self.dc_layout.setContentsMargins(16, 14, 16, 14)
+        self.dc_layout.setSpacing(12)
+
+        self.detail_title = QLabel(f"SETTINGS FOR: {self.selected_monitor or 'No Display'}", self.detail_card)
+        self.detail_title.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-size: 12px; font-weight: bold;")
+        self.dc_layout.addWidget(self.detail_title)
+
+        toggles_row = QHBoxLayout()
+        self.active_check = QCheckBox("Enable Display (Turned On)", self.detail_card)
+        self.active_check.stateChanged.connect(self.on_active_toggled)
+        toggles_row.addWidget(self.active_check)
+
+        self.primary_check = QCheckBox("Make Primary Display", self.detail_card)
+        self.primary_check.stateChanged.connect(self.on_primary_toggled)
+        toggles_row.addWidget(self.primary_check)
+        toggles_row.addStretch()
+        self.dc_layout.addLayout(toggles_row)
+
+        form_grid = QGridLayout()
+        form_grid.setHorizontalSpacing(16)
+        form_grid.setVerticalSpacing(10)
+
+        # Resolution
+        lbl_res = QLabel("Resolution:", self.detail_card)
+        lbl_res.setStyleSheet("color: #888888; font-weight: bold; font-size: 11px;")
+        form_grid.addWidget(lbl_res, 0, 0)
+        self.combo_res = QComboBox(self.detail_card)
+        self.combo_res.currentIndexChanged.connect(self.on_resolution_changed)
+        form_grid.addWidget(self.combo_res, 0, 1)
+
+        # Refresh Rate
+        lbl_rate = QLabel("Refresh Rate:", self.detail_card)
+        lbl_rate.setStyleSheet("color: #888888; font-weight: bold; font-size: 11px;")
+        form_grid.addWidget(lbl_rate, 0, 2)
+        self.combo_rate = QComboBox(self.detail_card)
+        self.combo_rate.currentIndexChanged.connect(self.on_rate_changed)
+        form_grid.addWidget(self.combo_rate, 0, 3)
+
+        # Orientation
+        lbl_rot = QLabel("Orientation:", self.detail_card)
+        lbl_rot.setStyleSheet("color: #888888; font-weight: bold; font-size: 11px;")
+        form_grid.addWidget(lbl_rot, 1, 0)
+        self.combo_rot = QComboBox(self.detail_card)
+        self.combo_rot.addItem("Landscape (Normal)", "normal")
+        self.combo_rot.addItem("Portrait (Left 90°)", "left")
+        self.combo_rot.addItem("Portrait (Right 270°)", "right")
+        self.combo_rot.addItem("Landscape Inverted (180°)", "inverted")
+        self.combo_rot.currentIndexChanged.connect(self.on_rotation_changed)
+        form_grid.addWidget(self.combo_rot, 1, 1)
+
+        # Position Relative To
+        lbl_pos = QLabel("Placement:", self.detail_card)
+        lbl_pos.setStyleSheet("color: #888888; font-weight: bold; font-size: 11px;")
+        form_grid.addWidget(lbl_pos, 1, 2)
+        self.combo_pos = QComboBox(self.detail_card)
+        self.combo_pos.currentIndexChanged.connect(self.on_placement_changed)
+        form_grid.addWidget(self.combo_pos, 1, 3)
+
+        self.dc_layout.addLayout(form_grid)
+        layout.addWidget(self.detail_card)
+
+        # 3. Action Buttons Row
+        actions_row = QHBoxLayout()
+        actions_row.setSpacing(10)
+
+        self.apply_btn = QPushButton("Apply Display Settings", container)
+        self.apply_btn.setProperty("class", "PrimaryBtn")
+        self.apply_btn.clicked.connect(self.apply_display_settings)
+        actions_row.addWidget(self.apply_btn)
+
+        self.capture_btn = QPushButton("Capture Card 1080p@60Hz Preset", container)
+        self.capture_btn.setProperty("class", "SecondaryBtn")
+        self.capture_btn.clicked.connect(self.preset_capture_card)
+        actions_row.addWidget(self.capture_btn)
+
+        self.reset_btn = QPushButton("Reset All (Auto)", container)
+        self.reset_btn.setProperty("class", "SecondaryBtn")
+        self.reset_btn.clicked.connect(self.preset_reset_auto)
+        actions_row.addWidget(self.reset_btn)
+
+        actions_row.addStretch()
+        layout.addLayout(actions_row)
+
+        # 4. Quick Component Reloads Card
+        act_card = QFrame(container)
         act_card.setProperty("class", "CardFrame")
         ac_layout = QVBoxLayout(act_card)
-        ac_layout.setContentsMargins(16, 14, 16, 14)
-        ac_layout.setSpacing(10)
+        ac_layout.setContentsMargins(14, 10, 14, 10)
+        ac_layout.setSpacing(8)
 
         ac_title = QLabel("Quick Desktop Reloads", act_card)
-        ac_title.setStyleSheet("color: #FFFFFF; font-weight: bold; font-size: 13px;")
+        ac_title.setStyleSheet("color: #FFFFFF; font-weight: bold; font-size: 11.5px;")
         ac_layout.addWidget(ac_title)
 
         btns_row = QHBoxLayout()
-        btns_row.setSpacing(10)
+        btns_row.setSpacing(8)
 
         btn_i3 = QPushButton("Reload i3wm", act_card)
         btn_i3.setProperty("class", "SecondaryBtn")
@@ -846,25 +1239,347 @@ class DisplayTab(QWidget):
 
         btns_row.addStretch()
         ac_layout.addLayout(btns_row)
-
         layout.addWidget(act_card)
-        layout.addStretch()
 
-    def detect_monitors(self):
-        res = []
+        scroll.setWidget(container)
+        outer_layout.addWidget(scroll)
+
+        self.populate_form_for_selected()
+
+    def rebuild_monitor_boxes(self):
+        for i in reversed(range(self.boxes_row.count())):
+            item = self.boxes_row.itemAt(i)
+            if item.widget():
+                item.widget().setParent(None)
+
+        self.monitor_boxes = {}
+        for idx, (name, m) in enumerate(self.monitors.items(), start=1):
+            is_sel = (name == self.selected_monitor)
+            box = MonitorBox(m, idx, is_selected=is_sel)
+            box.clicked.connect(self.select_monitor)
+            self.boxes_row.addWidget(box)
+            self.monitor_boxes[name] = box
+
+        self.boxes_row.addStretch()
+
+    def select_monitor(self, name):
+        self.selected_monitor = name
+        for m_name, box in self.monitor_boxes.items():
+            box.set_selected(m_name == name)
+        self.detail_title.setText(f"SETTINGS FOR: {name}")
+        self.populate_form_for_selected()
+
+    def populate_form_for_selected(self):
+        if not self.selected_monitor or self.selected_monitor not in self.monitors:
+            return
+
+        m = self.monitors[self.selected_monitor]
+
+        self.active_check.blockSignals(True)
+        self.primary_check.blockSignals(True)
+        self.combo_res.blockSignals(True)
+        self.combo_rate.blockSignals(True)
+        self.combo_rot.blockSignals(True)
+        self.combo_pos.blockSignals(True)
+
+        self.active_check.setChecked(m.get("active", True))
+        self.primary_check.setChecked(m.get("primary", False))
+        self.primary_check.setEnabled(m.get("active", True))
+
+        # Populate Resolutions
+        self.combo_res.clear()
+        modes = list(m.get("modes", {}).keys())
+        if not modes:
+            modes = ["1920x1080", "1600x900", "1280x720"]
+
+        pref = m.get("preferred_res")
+        cur_res = m.get("current_res") or (modes[0] if modes else "1920x1080")
+
+        for mode in modes:
+            label = f"{mode} (Recommended)" if mode == pref else mode
+            self.combo_res.addItem(label, mode)
+
+        res_idx = 0
+        for i in range(self.combo_res.count()):
+            if self.combo_res.itemData(i) == cur_res:
+                res_idx = i
+                break
+        self.combo_res.setCurrentIndex(res_idx)
+
+        # Populate Rates
+        self.populate_rates_for_res(cur_res, m.get("current_rate"))
+
+        # Rotation
+        cur_rot = m.get("rotation", "normal")
+        rot_idx = 0
+        for i in range(self.combo_rot.count()):
+            if self.combo_rot.itemData(i) == cur_rot:
+                rot_idx = i
+                break
+        self.combo_rot.setCurrentIndex(rot_idx)
+
+        # Placement
+        self.combo_pos.clear()
+        other_monitors = [k for k in self.monitors.keys() if k != self.selected_monitor and self.monitors[k].get("active", True)]
+        if not other_monitors:
+            self.combo_pos.addItem("Standalone / Primary Screen", None)
+            self.combo_pos.setEnabled(False)
+        else:
+            self.combo_pos.setEnabled(True)
+            for other in other_monitors:
+                self.combo_pos.addItem(f"Right of {other}", ("--right-of", other))
+                self.combo_pos.addItem(f"Left of {other}", ("--left-of", other))
+                self.combo_pos.addItem(f"Above {other}", ("--above", other))
+                self.combo_pos.addItem(f"Below {other}", ("--below", other))
+                self.combo_pos.addItem(f"Mirror / Duplicate {other}", ("--same-as", other))
+
+            # Select current placement if any
+            cur_placement = m.get("placement")
+            if cur_placement:
+                for i in range(self.combo_pos.count()):
+                    if self.combo_pos.itemData(i) == cur_placement:
+                        self.combo_pos.setCurrentIndex(i)
+                        break
+
+        self.active_check.blockSignals(False)
+        self.primary_check.blockSignals(False)
+        self.combo_res.blockSignals(False)
+        self.combo_rate.blockSignals(False)
+        self.combo_rot.blockSignals(False)
+        self.combo_pos.blockSignals(False)
+
+    def populate_rates_for_res(self, res, current_rate=None):
+        m = self.monitors[self.selected_monitor]
+        rates = m.get("modes", {}).get(res, ["60.00"])
+        self.combo_rate.clear()
+        for r in rates:
+            self.combo_rate.addItem(f"{float(r):.2f} Hz", r)
+
+        rate_idx = 0
+        if current_rate:
+            for i in range(self.combo_rate.count()):
+                if self.combo_rate.itemData(i) == current_rate:
+                    rate_idx = i
+                    break
+        self.combo_rate.setCurrentIndex(rate_idx)
+
+    def on_resolution_changed(self, idx):
+        if not self.selected_monitor:
+            return
+        res = self.combo_res.itemData(idx)
+        self.monitors[self.selected_monitor]["current_res"] = res
+        self.populate_rates_for_res(res)
+        self.rebuild_monitor_boxes()
+
+    def on_rate_changed(self, idx):
+        if not self.selected_monitor:
+            return
+        rate = self.combo_rate.itemData(idx)
+        self.monitors[self.selected_monitor]["current_rate"] = rate
+        self.rebuild_monitor_boxes()
+
+    def on_active_toggled(self, state):
+        if not self.selected_monitor:
+            return
+        is_active = (state == Qt.Checked)
+        self.monitors[self.selected_monitor]["active"] = is_active
+        self.primary_check.setEnabled(is_active)
+        self.rebuild_monitor_boxes()
+
+    def on_primary_toggled(self, state):
+        if not self.selected_monitor:
+            return
+        is_pri = (state == Qt.Checked)
+        if is_pri:
+            for k in self.monitors:
+                self.monitors[k]["primary"] = (k == self.selected_monitor)
+        else:
+            self.monitors[self.selected_monitor]["primary"] = False
+        self.rebuild_monitor_boxes()
+
+    def on_rotation_changed(self, idx):
+        if not self.selected_monitor:
+            return
+        rot = self.combo_rot.itemData(idx)
+        self.monitors[self.selected_monitor]["rotation"] = rot
+
+    def on_placement_changed(self, idx):
+        if not self.selected_monitor:
+            return
+        placement = self.combo_pos.itemData(idx)
+        self.monitors[self.selected_monitor]["placement"] = placement
+
+    def preset_extend_right(self):
+        names = list(self.monitors.keys())
+        if len(names) >= 2:
+            self.monitors[names[0]]["active"] = True
+            self.monitors[names[0]]["primary"] = True
+            self.monitors[names[0]]["placement"] = None
+
+            self.monitors[names[1]]["active"] = True
+            self.monitors[names[1]]["primary"] = False
+            self.monitors[names[1]]["placement"] = ("--right-of", names[0])
+            self.rebuild_monitor_boxes()
+            self.populate_form_for_selected()
+            self.apply_display_settings()
+
+    def preset_extend_left(self):
+        names = list(self.monitors.keys())
+        if len(names) >= 2:
+            self.monitors[names[0]]["active"] = True
+            self.monitors[names[0]]["primary"] = True
+            self.monitors[names[0]]["placement"] = None
+
+            self.monitors[names[1]]["active"] = True
+            self.monitors[names[1]]["primary"] = False
+            self.monitors[names[1]]["placement"] = ("--left-of", names[0])
+            self.rebuild_monitor_boxes()
+            self.populate_form_for_selected()
+            self.apply_display_settings()
+
+    def preset_mirror(self):
+        names = list(self.monitors.keys())
+        if len(names) >= 2:
+            pri = names[0]
+            self.monitors[pri]["active"] = True
+            self.monitors[pri]["primary"] = True
+            self.monitors[pri]["placement"] = None
+
+            for other in names[1:]:
+                self.monitors[other]["active"] = True
+                self.monitors[other]["primary"] = False
+                self.monitors[other]["placement"] = ("--same-as", pri)
+            self.rebuild_monitor_boxes()
+            self.populate_form_for_selected()
+            self.apply_display_settings()
+
+    def preset_capture_card(self):
+        names = list(self.monitors.keys())
+        if len(names) >= 2:
+            pri = names[0]
+            sec = names[1]
+            self.monitors[pri]["active"] = True
+            self.monitors[pri]["primary"] = True
+            self.monitors[pri]["current_res"] = "1920x1080"
+            self.monitors[pri]["current_rate"] = "60.00"
+            self.monitors[pri]["placement"] = None
+
+            self.monitors[sec]["active"] = True
+            self.monitors[sec]["primary"] = False
+            self.monitors[sec]["current_res"] = "1920x1080"
+            self.monitors[sec]["current_rate"] = "60.00"
+            self.monitors[sec]["placement"] = ("--same-as", pri)
+            self.rebuild_monitor_boxes()
+            self.populate_form_for_selected()
+            self.apply_display_settings()
+
+    def preset_reset_auto(self):
+        cmd = ["xrandr", "--auto"]
+        subprocess.run(cmd)
+        self.monitors = self.query_monitors()
+        self.rebuild_monitor_boxes()
+        self.populate_form_for_selected()
+        self.refresh_environment()
+
+    def identify_displays(self):
+        lines = []
+        for idx, (name, m) in enumerate(self.monitors.items(), start=1):
+            status = f"{m.get('current_res')} @ {float(m.get('current_rate', 60)):.0f}Hz" if m.get('active') else "OFF"
+            pri = " (Primary)" if m.get('primary') else ""
+            lines.append(f"[{idx}] {name}: {status}{pri}")
+
+        text = "\n".join(lines)
+        if shutil.which("notify-send"):
+            subprocess.Popen(["notify-send", "-u", "critical", "-t", "4000", "DISPLAY IDENTIFIER", text])
+        else:
+            QMessageBox.information(self, "Display Identifier", text)
+
+    def build_xrandr_command(self):
+        cmd = ["xrandr"]
+        for name, m in self.monitors.items():
+            if not m.get("active", True):
+                cmd.extend(["--output", name, "--off"])
+            else:
+                cmd.extend(["--output", name])
+                if m.get("primary", False):
+                    cmd.append("--primary")
+                if m.get("current_res"):
+                    cmd.extend(["--mode", m["current_res"]])
+                if m.get("current_rate"):
+                    cmd.extend(["--rate", m["current_rate"]])
+                rot = m.get("rotation", "normal")
+                cmd.extend(["--rotate", rot])
+                placement = m.get("placement")
+                if placement and len(placement) == 2:
+                    cmd.extend([placement[0], placement[1]])
+        return cmd
+
+    def apply_display_settings(self):
+        # 1. Save previous state for revert
+        prev_cmd = ["xrandr"]
+        for name, m in self.monitors.items():
+            if m.get("active"):
+                prev_cmd.extend(["--output", name, "--auto"])
+            else:
+                prev_cmd.extend(["--output", name, "--off"])
+        self.previous_cmd = prev_cmd
+
+        # 2. Build and run new command
+        new_cmd = self.build_xrandr_command()
         try:
-            out = subprocess.check_output(["xrandr", "--query"], stderr=subprocess.DEVNULL).decode("utf-8")
-            for line in out.splitlines():
-                if " connected" in line:
-                    res.append(line.split()[0] + (" (Primary)" if "primary" in line else ""))
-        except Exception:
-            pass
-        return res if res else ["Standard Display (xrandr unavailable)"]
+            env = dict(os.environ)
+            if "DISPLAY" not in env or not env["DISPLAY"]:
+                env["DISPLAY"] = ":0"
+            subprocess.run(new_cmd, env=env, check=False)
+            self.refresh_environment()
+        except Exception as e:
+            QMessageBox.critical(self, "Error Applying Settings", str(e))
+            return
 
-    def launch_display_mirror(self):
-        script = os.path.join(CONFIG_DIR, "i3", "scripts", "display_mirror.sh")
-        if os.path.exists(script):
-            subprocess.Popen(["bash", script])
+        # 3. Confirmation Dialog with 15-second Revert Timer
+        dialog = RevertCountdownDialog(
+            revert_callback=self.revert_display_settings,
+            keep_callback=lambda: self.save_to_autostart_script(new_cmd),
+            parent=self,
+            timeout=15
+        )
+        dialog.exec_()
+
+    def revert_display_settings(self):
+        if self.previous_cmd:
+            env = dict(os.environ)
+            if "DISPLAY" not in env or not env["DISPLAY"]:
+                env["DISPLAY"] = ":0"
+            subprocess.run(self.previous_cmd, env=env)
+            self.refresh_environment()
+            if shutil.which("notify-send"):
+                subprocess.Popen(["notify-send", "-u", "normal", "Display Settings", "Reverted to previous display configuration."])
+
+    def save_to_autostart_script(self, cmd):
+        script_dir = os.path.join(CONFIG_DIR, "i3", "scripts")
+        os.makedirs(script_dir, exist_ok=True)
+        script_path = os.path.join(script_dir, "display_layout.sh")
+
+        cmd_str = " ".join(cmd)
+        content = f"""#!/usr/bin/env bash
+# Wu-Tang Clan Display Layout Configuration
+# Auto-generated by cream-settings
+export DISPLAY="${{DISPLAY:-:0}}"
+{cmd_str}
+"""
+        with open(script_path, "w") as f:
+            f.write(content)
+        os.chmod(script_path, 0o755)
+
+        if shutil.which("notify-send"):
+            subprocess.Popen(["notify-send", "-u", "low", "Display Settings", "Configuration saved to autostart!"])
+
+    def refresh_environment(self):
+        # Update wallpaper
+        if os.path.exists(FEHBG_PATH):
+            subprocess.Popen(["bash", FEHBG_PATH])
+        # Restart Polybar
+        self.restart_polybar()
 
     def restart_polybar(self):
         script = os.path.join(CONFIG_DIR, "polybar", "launch.sh")
