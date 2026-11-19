@@ -9,3 +9,4 @@ __pycache__/
 *.tmp
 position.json
 fish_variables
+install.sh
