@@ -130,7 +130,7 @@ The repository includes a modern interactive Python 3 TUI installer ([`install.p
 
 ### 1. Clone repository
 ```bash
-git clone https://github.com/<your-username>/dotfiles.git ~/.dotfiles
+git clone https://github.com/3plz/i3-cream.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
