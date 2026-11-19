@@ -20,7 +20,7 @@ import psutil
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QLabel, QPushButton, QVBoxLayout,
     QHBoxLayout, QFrame, QStackedWidget, QScrollArea, QGridLayout,
-    QCheckBox, QSizePolicy, QMessageBox
+    QCheckBox, QSizePolicy, QMessageBox, QFileDialog
 )
 from PyQt5.QtCore import Qt, QTimer, QSize, pyqtSignal
 from PyQt5.QtGui import QPixmap, QFont, QColor, QPalette, QIcon, QPainter, QBrush, QPen
@@ -248,6 +248,7 @@ class WallpaperTab(QWidget):
         return None
 
     def init_ui(self):
+        self.setAcceptDrops(True)
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(24, 20, 24, 20)
         main_layout.setSpacing(16)
@@ -259,6 +260,12 @@ class WallpaperTab(QWidget):
         head_layout.addWidget(title)
 
         head_layout.addStretch()
+
+        self.add_btn = QPushButton("+ Add Custom", self)
+        self.add_btn.setProperty("class", "SecondaryBtn")
+        self.add_btn.setToolTip("Upload or select custom wallpaper from files")
+        self.add_btn.clicked.connect(self.add_custom_wallpaper)
+        head_layout.addWidget(self.add_btn)
 
         self.apply_btn = QPushButton("Apply Wallpaper", self)
         self.apply_btn.setProperty("class", "PrimaryBtn")
@@ -319,6 +326,62 @@ class WallpaperTab(QWidget):
             card = WallpaperCard(wp, is_current=is_cur)
             card.clicked.connect(self.on_wallpaper_selected)
             self.grid.addWidget(card, idx // cols, idx % cols)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            for url in event.mimeData().urls():
+                ext = os.path.splitext(url.toLocalFile())[1].lower()
+                if ext in ('.jpg', '.jpeg', '.png', '.webp'):
+                    event.acceptProposedAction()
+                    return
+        event.ignore()
+
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls():
+            for url in event.mimeData().urls():
+                local_path = url.toLocalFile()
+                if os.path.isfile(local_path):
+                    self.import_wallpaper_file(local_path)
+                    event.acceptProposedAction()
+                    break
+
+    def add_custom_wallpaper(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Custom Wallpaper",
+            HOME,
+            "Images (*.png *.jpg *.jpeg *.webp);;All Files (*)"
+        )
+        if file_path:
+            self.import_wallpaper_file(file_path)
+
+    def import_wallpaper_file(self, file_path):
+        if not file_path or not os.path.isfile(file_path):
+            return
+
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext not in (".jpg", ".jpeg", ".png", ".webp"):
+            QMessageBox.warning(self, "Invalid Format", "Please select a valid image file (.jpg, .png, .webp).")
+            return
+
+        target_dir = os.path.join(DOTFILES, "wallpapers")
+        os.makedirs(target_dir, exist_ok=True)
+        base_name = os.path.basename(file_path)
+        target_path = os.path.join(target_dir, base_name)
+
+        if os.path.abspath(file_path) != os.path.abspath(target_path):
+            if os.path.exists(target_path):
+                name, ext_part = os.path.splitext(base_name)
+                counter = 1
+                while os.path.exists(os.path.join(target_dir, f"{name}_{counter}{ext_part}")):
+                    counter += 1
+                target_path = os.path.join(target_dir, f"{name}_{counter}{ext_part}")
+            shutil.copy2(file_path, target_path)
+
+        self.load_wallpapers()
+        self.on_wallpaper_selected(target_path)
+        self.status_lbl.setText(f"Added: {os.path.basename(target_path)} — Click 'Apply Wallpaper' to set as desktop background")
+        self.status_lbl.setStyleSheet("color: #FFB800; font-size: 11px; font-weight: bold;")
 
     def on_wallpaper_selected(self, file_path):
         self.selected_path = file_path
