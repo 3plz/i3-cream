@@ -3,10 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Temporary & backup files
+# Temporary, backup & state files
 *.bak
 *.backup
 *.tmp
-
-# Widget volatile state (window coordinates)
 position.json
+fish_variables

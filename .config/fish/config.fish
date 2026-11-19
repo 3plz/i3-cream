@@ -44,5 +44,5 @@ if status is-interactive
 end
 
 # System Paths
-fish_add_path /home/3plz/.local/bin
-fish_add_path /home/3plz/.spicetify
+fish_add_path $HOME/.local/bin
+fish_add_path $HOME/.spicetify

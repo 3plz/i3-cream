@@ -8,5 +8,5 @@ pkill -f "python3.*sone_widget/widget.py" 2>/dev/null || true
 sleep 0.3
 
 # Launch in background detached
-nohup python3 /home/3plz/.config/sone_widget/widget.py >/tmp/sone_widget.log 2>&1 &
+nohup python3 $HOME/.config/sone_widget/widget.py >/tmp/sone_widget.log 2>&1 &
 disown

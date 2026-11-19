@@ -1,2 +1,2 @@
 #!/bin/sh
-feh --no-fehbg --bg-fill '/home/3plz/Pictures/Wallpappers/WuTangClan.png'
+feh --no-fehbg --bg-fill '$HOME/Pictures/Wallpappers/WuTangClan.png'
