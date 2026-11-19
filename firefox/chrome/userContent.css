@@ -1,0 +1,160 @@
+/* ==========================================================
+   Wu-Tang Clan TUI userContent.css for Firefox
+   Custom styling for about:newtab, about:home, and about:blank
+   Fonts: WuTangIcons, Silkscreen, Terminess Nerd Font
+   Palette: Wu-Tang Gold (#FFB800) & Deep Onyx Black (#0C0C0C)
+   ========================================================== */
+
+@-moz-document url("about:newtab"), url("about:home"), url("about:blank") {
+  /* Global Background & Base */
+  :root, body {
+    background-color: #0c0c0c !important;
+    color: #ffffff !important;
+    font-family: 'Terminess Nerd Font', monospace !important;
+  }
+
+  /* Sharp zero-radius everywhere */
+  * {
+    border-radius: 0px !important;
+  }
+
+  /* Activity stream outer containers */
+  .activity-stream, .outer-wrapper, main {
+    background-color: #0c0c0c !important;
+  }
+
+  /* ---------------- Logo & Wordmark ---------------- */
+  .logo-and-wordmark {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: 28px !important;
+  }
+
+  .logo-and-wordmark .logo {
+    display: none !important;
+  }
+
+  .logo-and-wordmark .wordmark {
+    display: none !important;
+  }
+
+  /* Vector Wu-Tang Clan Emblem via custom font glyph */
+  .logo-and-wordmark::before {
+    content: "W" !important;
+    font-family: "WuTangIcons" !important;
+    font-size: 88px !important;
+    line-height: 1 !important;
+    color: #ffb800 !important;
+    filter: drop-shadow(0 0 16px rgba(255, 184, 0, 0.45)) !important;
+    margin-bottom: 12px !important;
+    transition: transform 0.25s ease, filter 0.25s ease !important;
+  }
+
+  .logo-and-wordmark:hover::before {
+    transform: scale(1.06) !important;
+    filter: drop-shadow(0 0 26px rgba(255, 184, 0, 0.8)) !important;
+  }
+
+  /* Title underneath the emblem */
+  .logo-and-wordmark::after {
+    content: "WU-TANG CLAN  //  36 CHAMBERS" !important;
+    font-family: "Silkscreen", monospace !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    letter-spacing: 0.15em !important;
+    color: #ffb800 !important;
+    margin-top: 4px !important;
+    text-shadow: 0 0 8px rgba(255, 184, 0, 0.3) !important;
+  }
+
+  /* ---------------- Search Bar (Hidden) ---------------- */
+  .search-wrapper {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin-bottom: 10px !important;
+  }
+
+  .search-inner-wrapper,
+  content-search-handoff-ui,
+  .search-handoff-button {
+    display: none !important;
+  }
+
+  /* ---------------- Top Sites / Pins ---------------- */
+  .top-sites-list {
+    margin-top: 24px !important;
+  }
+
+  .top-site-outer .tile {
+    background-color: #141414 !important;
+    border: 1.5px solid #282828 !important;
+    border-radius: 0px !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .top-site-outer:hover .tile {
+    background-color: #1c1c1c !important;
+    border: 1.5px solid #ffb800 !important;
+    box-shadow: 0 0 14px rgba(255, 184, 0, 0.35) !important;
+    transform: translateY(-2px) !important;
+  }
+
+  .top-site-outer .title {
+    color: #cccccc !important;
+    font-family: "Silkscreen", monospace !important;
+    font-size: 11px !important;
+    margin-top: 8px !important;
+    transition: color 0.2s ease !important;
+  }
+
+  .top-site-outer:hover .title {
+    color: #ffb800 !important;
+  }
+
+  .top-site-outer .icon-wrapper {
+    background-color: #0c0c0c !important;
+    border-radius: 0px !important;
+  }
+
+  .top-site-outer .context-menu-button {
+    color: #8c7b58 !important;
+    border-radius: 0px !important;
+  }
+
+  .top-site-outer .context-menu-button:hover {
+    color: #ffb800 !important;
+    background-color: #222222 !important;
+  }
+
+  /* Hide clutter (Pocket, Sponsored, Footers, Promotions) */
+  .ds-layout, .pocket-section, .pocket-header, .sponsored-top-site,
+  .section-top-bar, .context-menu, footer, .snippet-container,
+  [data-section-id="topstories"], [data-section-id="pocket"],
+  .collapsible-section[data-section-id="highlights"],
+  .sponsored-card, .sponsored-label, .inline-onboarding {
+    display: none !important;
+  }
+
+  /* Personalize button in corner */
+  .personalize-button {
+    color: #8c7b58 !important;
+    border: 1px solid transparent !important;
+  }
+  .personalize-button:hover {
+    color: #ffb800 !important;
+    border: 1px solid #ffb800 !important;
+    background: #141414 !important;
+  }
+}
+
+/* ---------------- TUI Scrollbar ---------------- */
+@-moz-document url-prefix("about:") {
+  * {
+    scrollbar-color: #ffb800 #0c0c0c !important;
+    scrollbar-width: thin !important;
+  }
+}

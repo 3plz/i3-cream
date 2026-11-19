@@ -1,0 +1,195 @@
+/**
+ * @name Wu-Tang Clan TUI
+ * @description Sharp retro TUI theme for Vesktop / Vencord matching the Wu-Tang Clan aesthetic.
+ * @author 3plz & Deepmind
+ * @version 1.0.0
+*/
+
+/* Import system24 base architecture */
+@import url('https://refact0r.github.io/system24/build/system24.css');
+
+body {
+    /* Fonts matching system rice */
+    --font: 'Terminess Nerd Font', 'Silkscreen', monospace;
+    --code-font: 'Terminess Nerd Font', monospace;
+    font-weight: 400;
+    letter-spacing: -0.02ch;
+
+    /* Sizes & Spacing */
+    --gap: 10px;
+    --divider-thickness: 3px;
+    --border-thickness: 1.5px;
+    --border-hover-transition: 0.15s ease;
+
+    /* Animations */
+    --animations: on;
+    --list-item-transition: 0.15s ease;
+
+    /* Top bar */
+    --top-bar-height: var(--gap);
+    --top-bar-button-position: titlebar;
+
+    /* Unrounding & Retro Aesthetic */
+    --unrounding: on;
+    --round-pfp: off;
+    --remove-pfp-decor: on;
+
+    /* Styling */
+    --custom-spotify-bar: on;
+    --ascii-titles: on;
+    --ascii-loader: system24;
+    --panel-labels: on;
+    --label-color: #8C7B58;
+    --label-font-weight: 600;
+}
+
+:root {
+    --colors: on;
+
+    /* Wu-Tang Clan Palette */
+    --wutang-gold: #FFB800;
+    --wutang-gold-dim: #D4AF37;
+    --wutang-gold-dark: #997000;
+    --wutang-onyx: #0C0C0C;
+    --wutang-black-2: #121212;
+    --wutang-black-3: #181818;
+    --wutang-black-4: #222222;
+
+    /* Text Colors */
+    --text-0: #0C0C0C;                /* text on gold badges/buttons */
+    --text-1: #FFFFFF;                /* crisp white headings & text */
+    --text-2: #F0F0F0;                /* channel names & messages */
+    --text-3: #D0D0D0;                /* general text */
+    --text-4: #8C7B58;                /* muted icons, brass channels */
+    --text-5: #555555;                /* timestamps & muted channels */
+
+    /* Backgrounds */
+    --bg-1: #222222;                  /* clicked buttons */
+    --bg-2: #181818;                  /* buttons & cards */
+    --bg-3: #121212;                  /* secondary panels & list backgrounds */
+    --bg-4: #0C0C0C;                  /* main deep onyx background */
+    --hover: rgba(255, 184, 0, 0.08); /* channels/items on hover */
+    --active: rgba(255, 184, 0, 0.18);/* channels/items active/selected */
+    --active-2: rgba(255, 184, 0, 0.28);
+    --message-hover: rgba(255, 184, 0, 0.04);
+
+    /* Accents (Wu-Tang Gold) */
+    --accent-1: #FFB800;              /* links, mentions, accents */
+    --accent-2: #FFB800;
+    --accent-3: #FFB800;
+    --accent-4: #E6A817;
+    --accent-5: #D4AF37;
+    --accent-new: #FF5555;            /* ping badge / mute / deafen */
+
+    /* Mentions & Replies */
+    --mention: linear-gradient(to right, rgba(255, 184, 0, 0.15) 35%, transparent);
+    --mention-hover: linear-gradient(to right, rgba(255, 184, 0, 0.22) 35%, transparent);
+    --reply: linear-gradient(to right, rgba(255, 255, 255, 0.06) 35%, transparent);
+    --reply-hover: linear-gradient(to right, rgba(255, 255, 255, 0.10) 35%, transparent);
+
+    /* Status Indicators */
+    --online: #50FA7B;
+    --dnd: #FF5555;
+    --idle: #FFB800;
+    --streaming: #BD93F9;
+    --offline: #666666;
+
+    /* Borders */
+    --border-light: rgba(255, 184, 0, 0.25);
+    --border: #252525;
+    --border-hover: #FFB800;
+    --button-border: rgba(255, 184, 0, 0.35);
+
+    /* Palette overrides */
+    --yellow-1: #FFE066;
+    --yellow-2: #FFB800;
+    --yellow-3: #E6A817;
+    --yellow-4: #D4AF37;
+    --yellow-5: #997000;
+}
+
+/* ================= Custom Wu-Tang Enhancements ================= */
+
+/* Sharp zero-radius everywhere */
+*, *::before, *::after {
+    border-radius: 0px !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar-thumb {
+    background: #FFB800 !important;
+    border-radius: 0px !important;
+}
+::-webkit-scrollbar-track {
+    background: #0C0C0C !important;
+}
+
+/* Selected channel / server indicator */
+[class*="item_"][style*="background-color: var(--status-danger)"],
+[class*="unread_"] {
+    background-color: #FFB800 !important;
+}
+
+/* Active tab / Pill indicators in server list */
+[class*="pill_"] [class*="item_"] {
+    background-color: #FFB800 !important;
+}
+
+/* Bot tag / Verified badges */
+[class*="botTagRegular_"], [class*="botTagOP_"] {
+    background-color: #FFB800 !important;
+    color: #0C0C0C !important;
+    font-weight: bold !important;
+    font-family: 'Silkscreen', monospace !important;
+    font-size: 9px !important;
+}
+
+/* Unread message bar */
+[class*="newMessagesBar_"] {
+    background-color: #FFB800 !important;
+    color: #0C0C0C !important;
+}
+[class*="newMessagesBar_"] * {
+    color: #0C0C0C !important;
+    font-weight: bold !important;
+}
+
+/* Discord Home icon / DMs button: Wu-Tang Golden Glow */
+[data-list-item-id="guildsnav___home"] svg path {
+    fill: #FFB800 !important;
+}
+
+/* Sliders & volume controls */
+[class*="barFill_"] {
+    background: #FFB800 !important;
+}
+[class*="grabber_"] {
+    background: #FFB800 !important;
+    border: 1px solid #0C0C0C !important;
+}
+
+/* Code blocks (syntax highlight) */
+pre code, code.inline {
+    background: #141414 !important;
+    border: 1px solid rgba(255, 184, 0, 0.3) !important;
+    font-family: 'Terminess Nerd Font', monospace !important;
+}
+
+/* User profile banners / popouts */
+[class*="userPopoutOuter_"] {
+    border: 1.5px solid #FFB800 !important;
+    box-shadow: 0 0 14px rgba(255, 184, 0, 0.25) !important;
+}
+
+/* Context menus & dropdowns */
+[class*="menu_"] {
+    background: #121212 !important;
+    border: 1.5px solid #FFB800 !important;
+}
+[class*="colorDefault_"][class*="focused_"] {
+    background: #FFB800 !important;
+    color: #0C0C0C !important;
+}
+[class*="colorDefault_"][class*="focused_"] * {
+    color: #0C0C0C !important;
+}

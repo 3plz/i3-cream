@@ -1,0 +1,12 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary & backup files
+*.bak
+*.backup
+*.tmp
+
+# Widget volatile state (window coordinates)
+position.json

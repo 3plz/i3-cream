@@ -1,0 +1,67 @@
+# ============================================================
+#  Wu-Tang Clan Aesthetic Theme for Alacritty
+#  Palette: Deep Onyx Black & Wu-Tang Gold (#FFB800)
+# ============================================================
+
+[window]
+padding = { x = 14, y = 14 }
+dynamic_padding = true
+opacity = 0.95
+blur = true
+
+[font]
+size = 11.5
+
+[font.normal]
+family = "Terminess Nerd Font"
+style = "Regular"
+
+[font.bold]
+family = "Terminess Nerd Font"
+style = "Bold"
+
+[font.italic]
+family = "Terminess Nerd Font"
+style = "Italic"
+
+[font.bold_italic]
+family = "Terminess Nerd Font"
+style = "Bold Italic"
+
+[cursor]
+style = { shape = "Block", blinking = "On" }
+blink_interval = 550
+
+[colors.primary]
+background = "#0c0c0c"
+foreground = "#f8f8f2"
+
+[colors.cursor]
+text = "#0c0c0c"
+cursor = "#ffb800"
+
+[colors.selection]
+text = "#0c0c0c"
+background = "#ffb800"
+
+# Normal colors (Wu-Tang Gold & Warm Street Tones)
+[colors.normal]
+black   = "#181818"
+red     = "#d32f2f"
+green   = "#689f38"
+yellow  = "#ffb800"
+blue    = "#e5a823"
+magenta = "#a87ffb"
+cyan    = "#ffca28"
+white   = "#e2e2dc"
+
+# Bright colors
+[colors.bright]
+black   = "#424242"
+red     = "#ef5350"
+green   = "#8bc34a"
+yellow  = "#ffd54f"
+blue    = "#ffc107"
+magenta = "#c09eff"
+cyan    = "#ffe082"
+white   = "#ffffff"

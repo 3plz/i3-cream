@@ -1,0 +1,271 @@
+/* ============================================================
+   Wu-Tang Clan TUI Theme for Thunar (GTK-3.0)
+   Palette: Onyx Black (#0C0C0C) & Wu-Tang Gold (#FFB800)
+   ============================================================ */
+
+/* Global reset for Thunar */
+.thunar,
+.thunar *,
+window.thunar,
+window.thunar * {
+  border-radius: 0px !important;
+  font-family: "Terminess Nerd Font", "Terminus", monospace !important;
+}
+
+/* Base Window Background */
+.thunar,
+window.thunar,
+.thunar window {
+  background-color: #0c0c0c;
+  color: #f0f0f0;
+}
+
+/* Menubar */
+.thunar menubar {
+  background-color: #0c0c0c;
+  color: #f0f0f0;
+  border-bottom: 2px solid #FFB800;
+  box-shadow: none;
+  padding: 2px;
+}
+
+.thunar menubar menuitem {
+  background-color: #0c0c0c;
+  color: #f0f0f0;
+  padding: 4px 8px;
+}
+
+.thunar menubar menuitem:hover {
+  background-color: #FFB800;
+  color: #000000;
+  font-weight: bold;
+}
+
+/* Primary Toolbar */
+.thunar .primary-toolbar,
+.thunar toolbar {
+  background-color: #080808;
+  background-image: none;
+  border-bottom: 2px solid #FFB800;
+  padding: 4px 6px;
+  box-shadow: none;
+}
+
+.thunar .primary-toolbar button,
+.thunar toolbar button {
+  background-color: #080808;
+  color: #f0f0f0;
+  border: 1px solid transparent;
+  padding: 4px 8px;
+}
+
+.thunar .primary-toolbar button:hover,
+.thunar toolbar button:hover {
+  background-color: #FFB800;
+  color: #000000;
+  border-color: #FFB800;
+}
+
+.thunar .primary-toolbar button:active,
+.thunar .primary-toolbar button:checked {
+  background-color: #FFB800;
+  color: #000000;
+  font-weight: bold;
+}
+
+/* Path Bar (Breadcrumbs Navigation) */
+.thunar .path-bar button {
+  background-color: #121212;
+  color: #f0f0f0;
+  border: 1px solid #786c4a;
+  margin: 0px 2px;
+  padding: 3px 8px;
+}
+
+.thunar .path-bar button:hover {
+  background-color: #1c1808;
+  color: #FFB800;
+  border-color: #FFB800;
+}
+
+.thunar .path-bar button:checked {
+  background-color: #FFB800;
+  color: #000000;
+  border-color: #FFB800;
+  font-weight: bold;
+}
+
+/* Location Bar Entry (Ctrl+L) */
+.thunar entry {
+  background-color: #000000;
+  color: #ffffff;
+  border: 2px solid #FFB800;
+  box-shadow: none;
+  padding: 4px 8px;
+  selection-background-color: #FFB800;
+  selection-color: #000000;
+}
+
+.thunar entry:focus {
+  border-color: #FFD700;
+  box-shadow: 0 0 4px #FFB800;
+}
+
+/* Sidebar (Bookmarks, Devices, Places) */
+.thunar .sidebar,
+.thunar .sidebar .view,
+.thunar .sidebar treeview {
+  background-color: #070707;
+  color: #d0d0d0;
+  border-right: 2px solid #FFB800;
+}
+
+.thunar .sidebar row {
+  padding: 3px 4px;
+}
+
+.thunar .sidebar row:hover,
+.thunar .sidebar .view:hover {
+  background-color: #181508;
+  color: #FFB800;
+}
+
+.thunar .sidebar row:selected,
+.thunar .sidebar .view:selected {
+  background-color: #FFB800 !important;
+  color: #000000 !important;
+  font-weight: bold;
+}
+
+/* Main File View (Grid/Icon and Detailed List) */
+.thunar .view,
+.thunar .standard-view .view,
+.thunar treeview.view,
+.thunar iconview.view {
+  background-color: #0c0c0c;
+  color: #f0f0f0;
+}
+
+.thunar .view:hover {
+  color: #ffffff;
+}
+
+/* Selected Files / Invert Highlight */
+.thunar .view:selected,
+.thunar .standard-view .view:selected,
+.thunar iconview:selected,
+.thunar treeview:selected {
+  background-color: #FFB800 !important;
+  color: #000000 !important;
+  font-weight: bold;
+}
+
+.thunar .view:selected:focus,
+.thunar .standard-view .view:selected:focus {
+  background-color: #FFB800 !important;
+  color: #000000 !important;
+}
+
+/* Detailed List View Column Headers */
+.thunar treeview header button,
+.thunar .view button.flat {
+  background-color: #080808;
+  color: #FFB800;
+  border: 1px solid #333333;
+  border-bottom: 2px solid #FFB800;
+  font-weight: bold;
+  padding: 4px 8px;
+}
+
+.thunar treeview header button:hover {
+  background-color: #FFB800;
+  color: #000000;
+}
+
+/* Paned Splitter / Separator between Sidebar and Main View */
+.thunar paned > separator {
+  background-color: #FFB800;
+  min-width: 2px;
+  min-height: 2px;
+}
+
+/* Status Bar */
+.thunar statusbar,
+.thunar .statusbar {
+  background-color: #070707;
+  color: #8c7b58;
+  border-top: 2px solid #FFB800;
+  padding: 3px 10px;
+}
+
+/* Notebook / Tabs */
+.thunar notebook > header {
+  background-color: #070707;
+  border-bottom: 2px solid #FFB800;
+}
+
+.thunar notebook > header tab {
+  background-color: #0e0e0e;
+  color: #8c7b58;
+  border: 1px solid #222222;
+  border-bottom: none;
+  padding: 4px 12px;
+  margin-right: 2px;
+}
+
+.thunar notebook > header tab:hover {
+  background-color: #1a1608;
+  color: #FFB800;
+}
+
+.thunar notebook > header tab:checked {
+  background-color: #FFB800;
+  color: #000000;
+  font-weight: bold;
+  border-color: #FFB800;
+}
+
+/* Scrollbars */
+.thunar scrollbar {
+  background-color: #0c0c0c;
+}
+
+.thunar scrollbar slider {
+  background-color: #333333;
+  border-radius: 0px;
+  min-width: 6px;
+  min-height: 6px;
+}
+
+.thunar scrollbar slider:hover {
+  background-color: #FFB800;
+}
+
+/* Context Menus & Popups */
+.thunar menu,
+.thunar .menu,
+window.thunar menu {
+  background-color: #0c0c0c;
+  color: #f0f0f0;
+  border: 2px solid #FFB800;
+  padding: 4px;
+}
+
+.thunar menuitem,
+window.thunar menuitem {
+  padding: 4px 8px;
+}
+
+.thunar menuitem:hover,
+window.thunar menuitem:hover {
+  background-color: #FFB800 !important;
+  color: #000000 !important;
+  font-weight: bold;
+}
+
+/* Info Bars / Alerts inside Thunar */
+.thunar infobar {
+  background-color: #181508;
+  color: #FFB800;
+  border-bottom: 2px solid #FFB800;
+}

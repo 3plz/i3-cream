@@ -1,0 +1,154 @@
+/**
+ * Wu-Tang Clan Rofi Theme
+ * Font: Silkscreen
+ * Colors: Wu-Tang Gold (#FFB800) & Onyx Black (#0C0C0C)
+ */
+
+configuration {
+    modi:                       "drun,run,window";
+    show-icons:                 true;
+    display-drun:               "WU-TANG //";
+    display-run:                "RUN //";
+    display-window:             "WIN //";
+    drun-display-format:        "{name}";
+    disable-history:            false;
+}
+
+* {
+    bg      : #0c0c0c;
+    bg-alt  : #141414;
+    fg      : #f0f0f0;
+    fg-alt  : #786c4a;
+    gold    : #ffb800;
+    sel-bg  : #ffb800;
+    sel-fg  : #000000;
+    border  : #ffb800;
+
+    background-color:   transparent;
+    text-color:         @fg;
+
+    font: "Silkscreen 10";
+}
+
+window {
+    location:       center;
+    anchor:         center;
+    width:          520px;
+
+    background-color: @bg;
+    border:            2px;
+    border-color:      @border;
+    border-radius:     0px;
+    padding:           0px;
+
+    children: [ inputbar, message, listview ];
+}
+
+mainbox {
+    background-color: @bg;
+    spacing:           0px;
+    padding:           0px;
+    children: [ inputbar, message, listview ];
+}
+
+/* -------------------------------------------------- */
+/* Строка ввода / поиска                               */
+/* -------------------------------------------------- */
+inputbar {
+    background-color: @bg-alt;
+    text-color:        @fg;
+    border:            0px 0px 2px 0px;
+    border-color:      @border;
+    padding:           12px 14px;
+    spacing:           8px;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    background-color: transparent;
+    text-color:         @gold;
+    font:               "Silkscreen Bold 10";
+}
+
+entry {
+    background-color: transparent;
+    text-color:         @fg;
+    placeholder:        "SEARCH...";
+    placeholder-color:  @fg-alt;
+    cursor:             text;
+}
+
+/* -------------------------------------------------- */
+/* Служебная строка                                   */
+/* -------------------------------------------------- */
+message {
+    background-color: @bg;
+    border:            0px 0px 1px 0px;
+    border-color:      #222222;
+    padding:           6px 14px;
+}
+
+textbox {
+    background-color: transparent;
+    text-color:         @fg-alt;
+}
+
+/* -------------------------------------------------- */
+/* Список приложений / окон                            */
+/* -------------------------------------------------- */
+listview {
+    background-color: @bg;
+    columns:            1;
+    lines:              8;
+    spacing:            2px;
+    padding:            6px 0px;
+    cycle:              true;
+    dynamic:            true;
+    scrollbar:          true;
+    border:             0px;
+}
+
+scrollbar {
+    background-color: @bg;
+    handle-color:       @gold;
+    handle-width:       3px;
+    border:             0px 0px 0px 1px;
+    border-color:       #222222;
+}
+
+element {
+    background-color: @bg;
+    text-color:         @fg;
+    padding:            8px 14px;
+    border:             0px;
+    cursor:             pointer;
+    spacing:            10px;
+}
+
+element normal.normal {
+    background-color: @bg;
+    text-color:         @fg;
+}
+
+element selected.normal {
+    background-color: @sel-bg;
+    text-color:         @sel-fg;
+}
+
+element alternate.normal {
+    background-color: @bg;
+    text-color:         @fg;
+}
+
+element-icon {
+    size:              18px;
+    cursor:            inherit;
+    vertical-align:    0.5;
+}
+
+element-text {
+    background-color:  inherit;
+    text-color:        inherit;
+    vertical-align:    0.5;
+    horizontal-align:  0.0;
+}

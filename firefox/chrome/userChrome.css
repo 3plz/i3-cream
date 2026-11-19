@@ -1,0 +1,216 @@
+/* ==========================================================
+   TUI-style userChrome.css for Firefox
+   Черный фон, белая рамка, острые углы, моноширинный шрифт
+   Совместимо с современными версиями Firefox (127+)
+   ========================================================== */
+
+:root {
+  --tui-bg:        #0c0c0c !important;
+  --tui-fg:        #ffffff !important;
+  --tui-fg-alt:    #808080 !important;
+  --tui-border:    #ffb800 !important;
+  --tui-font:      "Terminess Nerd Font", "Terminus", monospace !important;
+
+  --tab-min-height: 32px !important;
+  --toolbarbutton-border-radius: 0px !important;
+}
+
+/* ---------------------------------------------------------
+   Вся верхняя панель (табы + адресная строка) - черный фон
+   --------------------------------------------------------- */
+#navigator-toolbox {
+  background-color: var(--tui-bg) !important;
+  border-bottom: 2px solid var(--tui-border) !important;
+}
+
+#navigator-toolbox,
+#navigator-toolbox * {
+  font-family: var(--tui-font) !important;
+  border-radius: 0px !important;
+}
+
+/* ---------------------------------------------------------
+   Полоса вкладок
+   --------------------------------------------------------- */
+#TabsToolbar {
+  background-color: var(--tui-bg) !important;
+}
+
+#tabbrowser-tabs,
+.tabbrowser-tab {
+  background-color: var(--tui-bg) !important;
+}
+
+.tab-background {
+  background-color: var(--tui-bg) !important;
+  border: 1px solid transparent !important;
+  border-radius: 0px !important;
+  margin: 0px !important;
+}
+
+/* неактивная вкладка */
+.tabbrowser-tab .tab-label {
+  color: var(--tui-fg-alt) !important;
+}
+
+/* активная вкладка - инверсия, как выделенный пункт в TUI */
+.tabbrowser-tab[selected="true"] .tab-background {
+  background-color: var(--tui-fg) !important;
+  border: 1px solid var(--tui-border) !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-label {
+  color: var(--tui-bg) !important;
+  font-weight: bold !important;
+}
+
+/* крестик закрытия вкладки - плоский, без скруглений/hover-кружка */
+.tab-close-button {
+  border-radius: 0px !important;
+}
+
+/* кнопка "+" новой вкладки */
+#tabs-newtab-button {
+  border-radius: 0px !important;
+}
+
+/* ---------------------------------------------------------
+   Панель навигации (кнопки назад/вперед + адресная строка)
+   --------------------------------------------------------- */
+#nav-bar {
+  background-color: var(--tui-bg) !important;
+  box-shadow: none !important;
+  border-top: 1px solid var(--tui-border) !important;
+}
+
+toolbar .toolbarbutton-1 {
+  border-radius: 0px !important;
+  color: var(--tui-fg) !important;
+}
+
+toolbar .toolbarbutton-1:hover {
+  background-color: var(--tui-fg) !important;
+}
+toolbar .toolbarbutton-1:hover > .toolbarbutton-icon {
+  filter: invert(1) !important;
+}
+
+/* ---------------------------------------------------------
+   Адресная строка - "[ SEARCH... ]" в стиле polybar/rofi
+   --------------------------------------------------------- */
+#urlbar-background {
+  background-color: var(--tui-bg) !important;
+  border: 2px solid var(--tui-border) !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+#urlbar-input,
+#urlbar .urlbar-input-box {
+  color: var(--tui-fg) !important;
+  font-family: var(--tui-font) !important;
+}
+
+#urlbar[focused="true"] > #urlbar-background {
+  border-color: var(--tui-fg) !important;
+  box-shadow: none !important;
+}
+
+/* выпадающий список подсказок */
+.urlbarView {
+  background-color: var(--tui-bg) !important;
+  border: 2px solid var(--tui-border) !important;
+  border-radius: 0px !important;
+  color: var(--tui-fg) !important;
+}
+
+.urlbarView-row {
+  border-radius: 0px !important;
+}
+
+.urlbarView-row[selected] {
+  background-color: var(--tui-fg) !important;
+  color: var(--tui-bg) !important;
+}
+.urlbarView-row[selected] * {
+  color: var(--tui-bg) !important;
+  fill: var(--tui-bg) !important;
+}
+
+/* ---------------------------------------------------------
+   Панель закладок
+   --------------------------------------------------------- */
+#PersonalToolbar {
+  background-color: var(--tui-bg) !important;
+  border-top: 1px solid var(--tui-border) !important;
+}
+
+#PersonalToolbar .bookmark-item {
+  color: var(--tui-fg) !important;
+  border-radius: 0px !important;
+}
+
+#PersonalToolbar .bookmark-item:hover {
+  background-color: var(--tui-fg) !important;
+  color: var(--tui-bg) !important;
+}
+
+/* ---------------------------------------------------------
+   Поиск на странице (Ctrl+F)
+   --------------------------------------------------------- */
+findbar {
+  background-color: var(--tui-bg) !important;
+  color: var(--tui-fg) !important;
+  border-top: 2px solid var(--tui-border) !important;
+}
+
+findbar .textbox-input {
+  background-color: var(--tui-bg) !important;
+  color: var(--tui-fg) !important;
+  border: 1px solid var(--tui-border) !important;
+  border-radius: 0px !important;
+}
+
+/* ---------------------------------------------------------
+   Панели/попапы (меню, загрузки и т.п.)
+   --------------------------------------------------------- */
+panel {
+  background-color: var(--tui-bg) !important;
+  color: var(--tui-fg) !important;
+  border: 2px solid var(--tui-border) !important;
+  border-radius: 0px !important;
+}
+
+menupopup {
+  background-color: var(--tui-bg) !important;
+  color: var(--tui-fg) !important;
+  border: 2px solid var(--tui-border) !important;
+  border-radius: 0px !important;
+}
+
+menuitem,
+menu {
+  color: var(--tui-fg) !important;
+  border-radius: 0px !important;
+}
+
+menuitem:hover,
+menu:hover {
+  background-color: var(--tui-fg) !important;
+  color: var(--tui-bg) !important;
+}
+
+/* ---------------------------------------------------------
+   Боковая панель (закладки/история/библиотека)
+   --------------------------------------------------------- */
+#sidebar-box {
+  background-color: var(--tui-bg) !important;
+  color: var(--tui-fg) !important;
+  border-right: 2px solid var(--tui-border) !important;
+}
+
+#sidebar-header {
+  background-color: var(--tui-bg) !important;
+  color: var(--tui-fg) !important;
+  border-bottom: 1px solid var(--tui-border) !important;
+}
