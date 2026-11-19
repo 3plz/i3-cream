@@ -9,8 +9,8 @@
 @import url('https://refact0r.github.io/system24/build/system24.css');
 
 body {
-    /* Fonts matching system rice */
-    --font: 'Terminess Nerd Font', 'Silkscreen', monospace;
+    /* Fonts matching system rice - Silkscreen (Polybar Wu-Tang font) */
+    --font: 'Silkscreen', 'Terminess Nerd Font', monospace;
     --code-font: 'Terminess Nerd Font', monospace;
     font-weight: 400;
     letter-spacing: -0.02ch;
@@ -109,6 +109,24 @@ body {
 }
 
 /* ================= Custom Wu-Tang Enhancements ================= */
+
+/* Typography: Polybar Silkscreen font priority */
+:root {
+    --font-primary: 'Silkscreen', 'Terminess Nerd Font', monospace !important;
+    --font-display: 'Silkscreen', 'Terminess Nerd Font', monospace !important;
+    --font-headline: 'Silkscreen', 'Terminess Nerd Font', monospace !important;
+}
+
+body, button, input, select, textarea,
+[class*="markup_"],
+[class*="messageContent_"],
+[class*="username_"],
+[class*="channelName_"],
+[class*="name_"],
+[class*="header_"],
+[class*="title_"] {
+    font-family: 'Silkscreen', 'Terminess Nerd Font', monospace !important;
+}
 
 /* Sharp zero-radius everywhere */
 *, *::before, *::after {
