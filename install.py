@@ -107,11 +107,11 @@ COMPONENTS = [
         "name": "Core Window Manager",
         "desc": "i3wm, Polybar, Picom, Feh, Dunst, Rofi",
         "links": [
-            ("i3", ".config/i3"),
-            ("polybar", ".config/polybar"),
-            ("picom", ".config/picom"),
-            ("rofi", ".config/rofi"),
-            ("dunst", ".config/dunst"),
+            (".config/i3", ".config/i3"),
+            (".config/polybar", ".config/polybar"),
+            (".config/picom", ".config/picom"),
+            (".config/rofi", ".config/rofi"),
+            (".config/dunst", ".config/dunst"),
             (".fehbg", ".fehbg"),
         ],
         "pkgs": ["i3-wm", "polybar", "picom", "feh", "rofi", "dunst", "libnotify"],
@@ -121,9 +121,9 @@ COMPONENTS = [
         "name": "Terminal & Shell",
         "desc": "Alacritty (Wu-Tang theme), Fish shell, Fastfetch lyrics banner",
         "links": [
-            ("alacritty", ".config/alacritty"),
-            ("fish", ".config/fish"),
-            ("fastfetch", ".config/fastfetch"),
+            (".config/alacritty", ".config/alacritty"),
+            (".config/fish", ".config/fish"),
+            (".config/fastfetch", ".config/fastfetch"),
         ],
         "pkgs": ["alacritty", "fish", "fastfetch"],
     },
@@ -132,7 +132,7 @@ COMPONENTS = [
         "name": "Code Editor (Neovim)",
         "desc": "LazyVim with custom Wu-Tang colorscheme & Lualine",
         "links": [
-            ("nvim", ".config/nvim"),
+            (".config/nvim", ".config/nvim"),
         ],
         "pkgs": ["neovim", "git"],
     },
@@ -141,8 +141,8 @@ COMPONENTS = [
         "name": "Desktop Widgets",
         "desc": "SONE Music Player widget + Hardware Task Manager widget",
         "links": [
-            ("sone_widget", ".config/sone_widget"),
-            ("perf_widget", ".config/perf_widget"),
+            (".config/sone_widget", ".config/sone_widget"),
+            (".config/perf_widget", ".config/perf_widget"),
         ],
         "pkgs": ["python-pyqt5", "python-psutil", "playerctl", "xdotool", "xorg-xprop"],
     },
@@ -151,8 +151,8 @@ COMPONENTS = [
         "name": "File Manager & GTK Theme",
         "desc": "Thunar Wu-Tang TUI styling, Breeze-Dark, Papirus icons",
         "links": [
-            ("gtk-3.0", ".config/gtk-3.0"),
-            ("gtk-4.0", ".config/gtk-4.0"),
+            (".config/gtk-3.0", ".config/gtk-3.0"),
+            (".config/gtk-4.0", ".config/gtk-4.0"),
             (".gtkrc-2.0", ".gtkrc-2.0"),
         ],
         "pkgs": ["thunar", "thunar-volman", "breeze-gtk", "papirus-icon-theme"],
@@ -162,8 +162,8 @@ COMPONENTS = [
         "name": "Discord (Vesktop) Theme",
         "desc": "Custom Wu-Tang TUI CSS theme for Vesktop",
         "links": [
-            ("vesktop/themes", ".config/vesktop/themes"),
-            ("vesktop/settings/quickCss.css", ".config/vesktop/settings/quickCss.css"),
+            (".config/vesktop/themes", ".config/vesktop/themes"),
+            (".config/vesktop/settings/quickCss.css", ".config/vesktop/settings/quickCss.css"),
         ],
         "pkgs": [],
     },
@@ -222,7 +222,7 @@ class TerminalUI:
     def raw_mode(self):
         if self.fd is not None and self.old_termios is None:
             self.old_termios = termios.tcgetattr(self.fd)
-            tty.setcbreak(self.fd)
+            tty.setraw(self.fd)
 
     def restore_mode(self):
         if self.fd is not None and self.old_termios is not None:
@@ -232,16 +232,38 @@ class TerminalUI:
     def get_key(self):
         if self.fd is None:
             return ""
-        ch = sys.stdin.read(1)
-        if ch == "\x1b":
-            r, _, _ = select.select([sys.stdin], [], [], 0.05)
-            if r:
-                ch += sys.stdin.read(1)
-                if ch.endswith("["):
-                    r, _, _ = select.select([sys.stdin], [], [], 0.05)
-                    if r:
-                        ch += sys.stdin.read(1)
-        return ch
+        try:
+            raw = os.read(self.fd, 1)
+            if not raw:
+                return ""
+            if raw == b"\x1b":
+                r, _, _ = select.select([self.fd], [], [], 0.05)
+                if r:
+                    raw += os.read(self.fd, 15)
+
+            seq = raw.decode("utf-8", errors="ignore")
+
+            if seq in ("\x1b[A", "\x1bOA", "\x1b[1;2A", "\x1b[1;5A"):
+                return "UP"
+            elif seq in ("\x1b[B", "\x1bOB", "\x1b[1;2B", "\x1b[1;5B"):
+                return "DOWN"
+            elif seq in ("\x1b[C", "\x1bOC", "\x1b[1;2C", "\x1b[1;5C"):
+                return "RIGHT"
+            elif seq in ("\x1b[D", "\x1bOD", "\x1b[1;2D", "\x1b[1;5D"):
+                return "LEFT"
+            elif seq in ("\r", "\n"):
+                return "ENTER"
+            elif seq == " ":
+                return "SPACE"
+            elif seq in ("\x1b", "\x1b\x1b"):
+                return "ESC"
+            elif seq == "\x03":
+                raise KeyboardInterrupt
+            return seq
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except Exception:
+            return ""
 
     def clear(self):
         sys.stdout.write("\033[H\033[2J")
@@ -395,11 +417,11 @@ class InstallerApp:
             )
 
             key = self.term.get_key()
-            if key in ("\x1b[A", "k"): # Up
+            if key in ("UP", "k", "w"): # Up
                 sel_idx = (sel_idx - 1) % len(menu_items)
-            elif key in ("\x1b[B", "j"): # Down
+            elif key in ("DOWN", "j", "s"): # Down
                 sel_idx = (sel_idx + 1) % len(menu_items)
-            elif key in ("\r", "\n", " "): # Enter
+            elif key in ("ENTER", "SPACE"): # Enter
                 if sel_idx == 0:
                     self.execute_install(mode="full")
                 elif sel_idx == 1:
@@ -418,7 +440,7 @@ class InstallerApp:
                 self.run_custom_selection()
             elif key == "4":
                 self.run_health_check()
-            elif key in ("5", "q", "Q", "\x1b"):
+            elif key in ("5", "q", "Q", "ESC"):
                 break
 
         self.cleanup()
@@ -475,11 +497,11 @@ class InstallerApp:
             )
 
             key = self.term.get_key()
-            if key in ("\x1b[A", "k"):
+            if key in ("UP", "k", "w"):
                 sel_idx = (sel_idx - 1) % total_items
-            elif key in ("\x1b[B", "j"):
+            elif key in ("DOWN", "j", "s"):
                 sel_idx = (sel_idx + 1) % total_items
-            elif key == " ":
+            elif key == "SPACE":
                 if sel_idx < len(COMPONENTS):
                     cid = COMPONENTS[sel_idx]["id"]
                     self.selected_components[cid] = not self.selected_components[cid]
@@ -487,7 +509,7 @@ class InstallerApp:
                 any_unchecked = any(not v for v in self.selected_components.values())
                 for cid in self.selected_components:
                     self.selected_components[cid] = any_unchecked
-            elif key in ("\r", "\n"):
+            elif key == "ENTER":
                 if sel_idx < len(COMPONENTS):
                     cid = COMPONENTS[sel_idx]["id"]
                     self.selected_components[cid] = not self.selected_components[cid]
@@ -496,7 +518,7 @@ class InstallerApp:
                     break
                 elif sel_idx == len(COMPONENTS) + 1:
                     break
-            elif key in ("q", "Q", "\x1b"):
+            elif key in ("q", "Q", "ESC"):
                 break
 
     # --------------------------------------------------------------------------
@@ -773,11 +795,11 @@ class InstallerApp:
             self.draw_box("INSTALLATION COMPLETE", content, footer="[↑/↓] Select  •  [Enter] Proceed")
 
             key = self.term.get_key()
-            if key in ("\x1b[A", "k"):
+            if key in ("UP", "k", "w"):
                 sel_idx = (sel_idx - 1) % len(options)
-            elif key in ("\x1b[B", "j"):
+            elif key in ("DOWN", "j", "s"):
                 sel_idx = (sel_idx + 1) % len(options)
-            elif key in ("\r", "\n", " "):
+            elif key in ("ENTER", "SPACE"):
                 if sel_idx == 0:
                     subprocess.run(["i3-msg", "restart"], capture_output=True)
                     time.sleep(0.5)
@@ -790,7 +812,7 @@ class InstallerApp:
                 time.sleep(0.5)
             elif key == "2":
                 self.view_log_screen()
-            elif key in ("3", "q", "Q", "\x1b"):
+            elif key in ("3", "q", "Q", "ESC"):
                 break
 
     def view_log_screen(self):
