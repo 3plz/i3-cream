@@ -10,6 +10,7 @@ echo "Installing dotfiles from: $DOTFILES_DIR"
 # 1. Config directories
 CONFIG_DIRS=(
     "alacritty"
+    "cream_settings"
     "dunst"
     "fastfetch"
     "fish"
@@ -70,5 +71,15 @@ if [ -d "$DOTFILES_DIR/wallpapers" ]; then
     ln -sfn "$DOTFILES_DIR/wallpapers" "$HOME/Pictures/Wallpappers"
     echo "Linked: ~/Pictures/Wallpappers -> $DOTFILES_DIR/wallpapers"
 fi
+
+# 6. Global Binaries
+mkdir -p "$HOME/.local/bin"
+for bin in "update-cream" "cream-settings"; do
+    if [ -f "$DOTFILES_DIR/bin/$bin" ]; then
+        chmod +x "$DOTFILES_DIR/bin/$bin"
+        ln -sfn "$DOTFILES_DIR/bin/$bin" "$HOME/.local/bin/$bin"
+        echo "Linked: ~/.local/bin/$bin -> $DOTFILES_DIR/bin/$bin"
+    fi
+done
 
 echo "All symlinks successfully created!"

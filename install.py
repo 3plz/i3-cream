@@ -156,6 +156,8 @@ PACMAN_PACKAGES = [
     ("playerctl", "Media player MPRIS CLI controller"),
     ("xdotool", "X11 window automation tool"),
     ("xorg-xprop", "X11 window property display tool"),
+    ("xorg-xinput", "X11 input device configuration tool"),
+    ("xorg-xrandr", "X11 display and resolution manager"),
 ]
 
 # ------------------------------------------------------------------------------
@@ -165,7 +167,7 @@ COMPONENTS = [
     {
         "id": "core",
         "name": "Core Window Manager",
-        "desc": "i3wm, Polybar, Picom, Feh, Dunst, Rofi",
+        "desc": "i3wm, Polybar, Picom, Feh, Dunst, Rofi, Xdotool",
         "links": [
             (".config/i3", ".config/i3"),
             (".config/polybar", ".config/polybar"),
@@ -174,7 +176,7 @@ COMPONENTS = [
             (".config/dunst", ".config/dunst"),
             (".fehbg", ".fehbg"),
         ],
-        "pkgs": ["i3-wm", "polybar", "picom", "feh", "rofi", "dunst", "libnotify"],
+        "pkgs": ["i3-wm", "polybar", "picom", "feh", "rofi", "dunst", "libnotify", "xdotool", "xorg-xrandr"],
     },
     {
         "id": "terminal",
@@ -207,7 +209,7 @@ COMPONENTS = [
             (".config/perf_widget", ".config/perf_widget"),
             (".config/cream_settings", ".config/cream_settings"),
         ],
-        "pkgs": ["python-pyqt5", "python-psutil", "playerctl", "xdotool", "xorg-xprop"],
+        "pkgs": ["python-pyqt5", "python-psutil", "playerctl", "xdotool", "xorg-xprop", "xorg-xinput"],
     },
     {
         "id": "thunar",
