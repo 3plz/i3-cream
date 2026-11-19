@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# ==============================================================================
+#   update-cream: One-Click Updater for Wu-Tang Clan i3 Rice
+#   Pulls latest git commits, refreshes symlinks, ensures permissions,
+#   and reloads i3 inplace.
+# ==============================================================================
+
+set -e
+
+DOTFILES_DIR="${HOME}/.dotfiles"
+
+# ANSI Colors
+GOLD='\033[38;2;255;184;0m'
+GOLD_BOLD='\033[1;38;2;255;184;0m'
+GRAY='\033[38;2;120;120;120m'
+GREEN='\033[1;38;2;76;175;80m'
+RED='\033[1;38;2;229;57;53m'
+RESET='\033[0m'
+
+echo -e "\n${GOLD_BOLD}╭── [ WU-TANG CLAN // UPDATE-CREAM ] ──╮${RESET}"
+echo -e "${GOLD}│${RESET}  ${GRAY}Target repository:${RESET} ${DOTFILES_DIR}"
+
+if [ ! -d "${DOTFILES_DIR}/.git" ]; then
+    echo -e "${GOLD}│${RESET}  ${RED}[!] Error: ${DOTFILES_DIR} is not a git repository.${RESET}"
+    echo -e "${GOLD_BOLD}╰──────────────────────────────────────╯${RESET}\n"
+    exit 1
+fi
+
+# 1. Git pull
+echo -e "${GOLD}│${RESET}  ${GOLD}⚡ Pulling latest updates from GitHub...${RESET}"
+cd "${DOTFILES_DIR}"
+
+if git pull origin main; then
+    echo -e "${GOLD}│${RESET}  ${GREEN}[OK] Git pull successful.${RESET}"
+else
+    echo -e "${GOLD}│${RESET}  ${RED}[!] Git pull failed or encountered merge conflicts.${RESET}"
+    echo -e "${GOLD_BOLD}╰──────────────────────────────────────╯${RESET}\n"
+    exit 1
+fi
+
+# 2. Fix script permissions
+echo -e "${GOLD}│${RESET}  ${GOLD}⚡ Verifying script execution permissions...${RESET}"
+chmod +x "${DOTFILES_DIR}"/install.py 2>/dev/null || true
+chmod +x "${DOTFILES_DIR}"/bin/* 2>/dev/null || true
+chmod +x "${DOTFILES_DIR}"/.config/i3/scripts/* 2>/dev/null || true
+chmod +x "${DOTFILES_DIR}"/.config/polybar/*.sh 2>/dev/null || true
+chmod +x "${DOTFILES_DIR}"/.config/sone_widget/*.sh 2>/dev/null || true
+chmod +x "${DOTFILES_DIR}"/.config/perf_widget/*.sh 2>/dev/null || true
+echo -e "${GOLD}│${RESET}  ${GREEN}[OK] Permissions verified (+x).${RESET}"
+
+# 3. Refresh symlinks via install.py
+echo -e "${GOLD}│${RESET}  ${GOLD}⚡ Synchronizing dotfile symlinks...${RESET}"
+python3 "${DOTFILES_DIR}/install.py" --link-only
+echo -e "${GOLD}│${RESET}  ${GREEN}[OK] Symlinks synchronized.${RESET}"
+
+# 4. Reload i3 if running
+if pgrep -x i3 >/dev/null 2>&1; then
+    echo -e "${GOLD}│${RESET}  ${GOLD}⚡ Reloading i3 window manager...${RESET}"
+    i3-msg restart >/dev/null 2>&1 || true
+    echo -e "${GOLD}│${RESET}  ${GREEN}[OK] i3 reloaded inplace.${RESET}"
+fi
+
+echo -e "${GOLD_BOLD}╰── [ ALL SYSTEMS UPDATED // C.R.E.A.M. ] ──╯${RESET}\n"
+
+# 5. Desktop notification
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send -u normal -i software-update-available "Wu-Tang Rice Updated" "i3-cream repository updated and reloaded successfully!" 2>/dev/null || true
+fi

@@ -184,6 +184,7 @@ COMPONENTS = [
             (".config/alacritty", ".config/alacritty"),
             (".config/fish", ".config/fish"),
             (".config/fastfetch", ".config/fastfetch"),
+            ("bin/update-cream", ".local/bin/update-cream"),
         ],
         "pkgs": ["alacritty", "fish", "fastfetch"],
     },

@@ -147,6 +147,13 @@ python3 install.py --check      # Run system health diagnostics
 python3 install.py --full       # Perform full automated installation
 ```
 
+### 4. One-Click Updates (`update-cream`)
+To pull updates from GitHub, verify permissions, refresh symlinks, and reload i3:
+```bash
+update-cream
+```
+*(or execute `~/.dotfiles/bin/update-cream` directly in any shell)*
+
 ---
 
 ## 📁 Repository Structure
@@ -156,6 +163,8 @@ python3 install.py --full       # Perform full automated installation
 ├── assets/
 │   ├── logo.png                # Vector gold Wu-Tang emblem
 │   └── screenshots/            # 1080p desktop, neovim & firefox screenshots
+├── bin/
+│   └── update-cream            # One-click updater script from GitHub
 ├── .config/
 │   ├── alacritty/              # Alacritty terminal emulator (Gold & Onyx palette)
 │   ├── dunst/                  # Notification daemon (Papirus-Dark, Gold frames)

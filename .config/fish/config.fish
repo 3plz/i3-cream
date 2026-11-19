@@ -41,6 +41,7 @@ if status is-interactive
     alias ls='ls --color=auto'
     alias ll='ls -lh --color=auto'
     alias la='ls -la --color=auto'
+    alias update-cream='~/.dotfiles/bin/update-cream'
 end
 
 # System Paths
