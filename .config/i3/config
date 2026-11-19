@@ -21,7 +21,7 @@ for_window [class="^.*"] border pixel 2
 for_window [class="fl64.exe" title="^$"] move scratchpad
 for_window [class="SoneWidget"] floating enable, border none, sticky enable
 for_window [title="Sone Track Widget"] floating enable, border none, sticky enable
-for_window [title="Wu-Tang Control Center"] floating enable, resize set 780 520, move position center
+for_window [title="Wu-Tang Control Center"] floating enable, resize set 980 640, move position center
 floating_modifier $MOD
 
 # Colors

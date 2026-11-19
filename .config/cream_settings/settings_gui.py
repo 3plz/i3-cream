@@ -349,7 +349,7 @@ class WallpaperTab(QWidget):
 
         wallpapers.sort(key=lambda x: os.path.basename(x).lower())
 
-        cols = 2
+        cols = 3
         for idx, wp in enumerate(wallpapers):
             is_cur = bool(self.current_path and os.path.abspath(wp) == os.path.abspath(self.current_path))
             card = WallpaperCard(wp, is_current=is_cur)
@@ -1709,7 +1709,8 @@ class CreamSettingsWindow(QWidget):
         self.setWindowTitle("Wu-Tang Control Center")
         if os.path.exists(LOGO_PATH):
             self.setWindowIcon(QIcon(LOGO_PATH))
-        self.setFixedSize(780, 520)
+        self.resize(980, 640)
+        self.setMinimumSize(860, 560)
         self.setStyleSheet(QSS_STYLE)
         self.init_ui()
 
