@@ -648,17 +648,47 @@ class TouchpadTab(QWidget):
         self.detect_touchpad()
 
     def detect_touchpad(self):
+        if not shutil.which("xinput"):
+            self.info_lbl.setText("xinput is not installed.\nPlease install it via: sudo pacman -S xorg-xinput")
+            self.info_lbl.setStyleSheet("color: #E53935; font-size: 11.5px; font-weight: bold;")
+            self.tap_check.setEnabled(False)
+            self.scroll_check.setEnabled(False)
+            self.dwt_check.setEnabled(False)
+            self.save_btn.setEnabled(False)
+            return
+
+        env = dict(os.environ)
+        if "DISPLAY" not in env or not env["DISPLAY"]:
+            env["DISPLAY"] = ":0"
+
         try:
-            out = subprocess.check_output(["xinput", "list"], stderr=subprocess.DEVNULL).decode("utf-8")
+            out = subprocess.check_output(["xinput", "list"], env=env, stderr=subprocess.DEVNULL).decode("utf-8")
+            # 1. Search common device names
             for line in out.splitlines():
-                if re.search(r'touchpad|trackpad', line, re.IGNORECASE):
+                if re.search(r'touchpad|trackpad|glidepoint|synaptics|elantech', line, re.IGNORECASE):
                     m = re.search(r'id=(\d+)', line)
                     if m:
                         self.touchpad_id = m.group(1)
-                        # Extract name
                         parts = line.split("id=")
                         self.touchpad_name = parts[0].replace("↳", "").replace("⎜", "").strip()
                         break
+
+            # 2. If not found by name, scan pointer devices for libinput tapping capability
+            if not self.touchpad_id:
+                for line in out.splitlines():
+                    if "pointer" in line:
+                        m = re.search(r'id=(\d+)', line)
+                        if m:
+                            dev_id = m.group(1)
+                            try:
+                                props = subprocess.check_output(["xinput", "list-props", dev_id], env=env, stderr=subprocess.DEVNULL).decode("utf-8")
+                                if "libinput Tapping Enabled" in props:
+                                    self.touchpad_id = dev_id
+                                    parts = line.split("id=")
+                                    self.touchpad_name = parts[0].replace("↳", "").replace("⎜", "").strip()
+                                    break
+                            except Exception:
+                                pass
         except Exception:
             pass
 
@@ -682,7 +712,10 @@ class TouchpadTab(QWidget):
         if not self.touchpad_id:
             return
         try:
-            out = subprocess.check_output(["xinput", "list-props", self.touchpad_id], stderr=subprocess.DEVNULL).decode("utf-8")
+            env = dict(os.environ)
+            if "DISPLAY" not in env or not env["DISPLAY"]:
+                env["DISPLAY"] = ":0"
+            out = subprocess.check_output(["xinput", "list-props", self.touchpad_id], env=env, stderr=subprocess.DEVNULL).decode("utf-8")
             # Tapping
             m_tap = re.search(r'libinput Tapping Enabled \(\d+\):\s+([01])', out)
             if m_tap:
@@ -748,17 +781,26 @@ class TouchpadTab(QWidget):
     def on_tap_changed(self, state):
         if self.touchpad_id:
             val = "1" if state == Qt.Checked else "0"
-            subprocess.run(["xinput", "set-prop", self.touchpad_id, "libinput Tapping Enabled", val])
+            env = dict(os.environ)
+            if "DISPLAY" not in env or not env["DISPLAY"]:
+                env["DISPLAY"] = ":0"
+            subprocess.run(["xinput", "set-prop", self.touchpad_id, "libinput Tapping Enabled", val], env=env)
 
     def on_scroll_changed(self, state):
         if self.touchpad_id:
             val = "1" if state == Qt.Checked else "0"
-            subprocess.run(["xinput", "set-prop", self.touchpad_id, "libinput Natural Scrolling Enabled", val])
+            env = dict(os.environ)
+            if "DISPLAY" not in env or not env["DISPLAY"]:
+                env["DISPLAY"] = ":0"
+            subprocess.run(["xinput", "set-prop", self.touchpad_id, "libinput Natural Scrolling Enabled", val], env=env)
 
     def on_dwt_changed(self, state):
         if self.touchpad_id:
             val = "1" if state == Qt.Checked else "0"
-            subprocess.run(["xinput", "set-prop", self.touchpad_id, "libinput Disable While Typing Enabled", val])
+            env = dict(os.environ)
+            if "DISPLAY" not in env or not env["DISPLAY"]:
+                env["DISPLAY"] = ":0"
+            subprocess.run(["xinput", "set-prop", self.touchpad_id, "libinput Disable While Typing Enabled", val], env=env)
 
     def save_to_autostart(self):
         script_dir = os.path.join(CONFIG_DIR, "i3", "scripts")
