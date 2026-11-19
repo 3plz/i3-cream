@@ -7,6 +7,6 @@ export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user
 pkill -f "python3.*perf_widget/widget.py" 2>/dev/null || true
 sleep 0.3
 
-# Launch in background
-nohup python3 $HOME/.config/perf_widget/widget.py >/tmp/perf_widget.log 2>&1 &
-disown
+# Launch detached from parent session
+setsid -f python3 "$HOME/.config/perf_widget/widget.py" >/tmp/perf_widget.log 2>&1
+

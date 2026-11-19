@@ -7,6 +7,6 @@ export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user
 pkill -f "python3.*sone_widget/widget.py" 2>/dev/null || true
 sleep 0.3
 
-# Launch in background detached
-nohup python3 $HOME/.config/sone_widget/widget.py >/tmp/sone_widget.log 2>&1 &
-disown
+# Launch detached from parent session
+setsid -f python3 "$HOME/.config/sone_widget/widget.py" >/tmp/sone_widget.log 2>&1
+
