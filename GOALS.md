@@ -1,58 +1,58 @@
 # 🎯 Wu-Tang Clan Rice — Roadmap & Goal List
 
-Проект кастомного рисования Arch Linux / i3wm в эстетике **Wu-Tang Clan (Pitch Black & Gold #FFB800)**.
+Custom Arch Linux / i3wm ricing project following the **Wu-Tang Clan (Pitch Black & Gold #FFB800)** aesthetic.
 
 ---
 
-## 📌 Актуальный список задач (Backlog & Goals)
+## 📌 Active Backlog & Goals
 
-### 🔋 1. Отображение и мониторинг заряда батареи (Ноутбуки) — В ПРИОРИТЕТЕ
-- [ ] **Универсальный модуль Polybar**:
-  - Автоматическое определение имени батареи (`BAT0`, `BAT1`, `BATT`) и адаптера питания через `/sys/class/power_supply/`.
-  - Форматирование в стиле TUI: `[BAT 85%⚡]` при зарядке и `[BAT 85%]` при разрядке.
-  - Подсветка золотом (`#FFB800`) и предупреждающий красный цвет (`#E53935`) при разряде ниже 20%.
-- [ ] **Интеграция в Performance Widget (`perf_widget`)**:
-  - Добавление графической шкалы заряда аккумулятора рядом с CPU, RAM, Disk и GPU.
-  - Отображение оставшегося времени работы и статуса подключения к сети.
-- [ ] **Уведомления о критическом заряде (Dunst Daemon)**:
-  - Фоновый легковесный скрипт-таймер, присылающий уведомления при 15% (Low Battery) и 5% (Critical Battery).
-
----
-
-### ⚙️ 2. Улучшения для мобильных устройств (Ноутбуки)
-- [ ] **Поддержка и оптимизация тачпада (Touchpad via Libinput)**:
-  - Включение клика по касанию (`Tap-to-click` / `Tapping = on`).
-  - Естественная прокрутка двумя пальцами (`Natural Scrolling`).
-  - Блокировка тачпада при наборе текста (`Disable-while-typing` / Palm rejection).
-  - Готовый конфигурационный файл `30-touchpad.conf` (для `/etc/X11/xorg.conf.d/`) или динамическая настройка через `xinput` в `autostart.sh`.
-  - Опционально: поддержка мультитач-жестов тремя пальцами для переключения воркспейсов i3 (`libinput-gestures`).
-- [ ] **Управление яркостью экрана**:
-  - Бинды `XF86MonBrightnessUp` / `XF86MonBrightnessDown` на базе `brightnessctl`.
-  - Модуль яркости в Polybar с процентным отображением.
-- [ ] **Сетевой менеджер и Bluetooth**:
-  - Интерактивное меню выбора Wi-Fi сетей и Bluetooth-устройств в стиле Wu-Tang Rofi.
+### 🔋 1. Laptop Battery Indicator & Monitoring — HIGH PRIORITY
+- [ ] **Universal Polybar Module**:
+  - Automatic detection of battery identifiers (`BAT0`, `BAT1`, `BATT`) and AC power adapters via `/sys/class/power_supply/`.
+  - TUI-styled status format: `[BAT 85%⚡]` while charging, `[BAT 85%]` on discharge.
+  - Accent coloring: Wu-Tang Gold (`#FFB800`) and warning Red (`#E53935`) when below 20%.
+- [ ] **Performance Widget Integration (`perf_widget`)**:
+  - Add a dedicated battery gauge bar alongside CPU, RAM, Disk, and GPU.
+  - Display remaining runtime / charging estimation and AC connection status.
+- [ ] **Critical Battery Notifications (Dunst Daemon)**:
+  - Lightweight background alert script firing desktop alerts at 15% (Low Battery) and 5% (Critical Battery).
 
 ---
 
-### 📦 3. Инсталлятор и кастомизация
-- [ ] **Интеграция SDDM в общий установщик**:
-  - Добавить установку темы SDDM (`sddm-theme-wutang`) опциональным чекбоксом в `install.py`.
-- [ ] **Профили экранов (Autorandr)**:
-  - Автоматическое применение зеркалирования карты захвата без необходимости вызова Rofi.
+### ⚙️ 2. Laptop & Mobile Enhancements
+- [ ] **Touchpad Support & Optimization (Libinput)**:
+  - Enable tap-to-click (`Tapping = on`).
+  - Enable two-finger natural scrolling (`Natural Scrolling`).
+  - Palm rejection / disable-while-typing (DWT).
+  - Ready-to-use Xorg drop-in config `30-touchpad.conf` (for `/etc/X11/xorg.conf.d/`) or dynamic auto-configuration via `xinput` in `autostart.sh` (non-root).
+  - Optional: 3-finger swipe gestures for rapid i3 workspace switching (`libinput-gestures`).
+- [ ] **Screen Brightness Controls**:
+  - Keybindings for `XF86MonBrightnessUp` / `XF86MonBrightnessDown` via `brightnessctl`.
+  - Polybar brightness module with percentage display (`[BRI 70%]`).
+- [ ] **Network & Bluetooth Menus**:
+  - Interactive Wi-Fi network selector and Bluetooth pairing menu in Wu-Tang Rofi style.
 
 ---
 
-## ✅ Выполненные задачи (Changelog)
+### 📦 3. Installer & Customization
+- [ ] **SDDM Theme Installer Integration**:
+  - Add SDDM theme (`sddm-theme-wutang`) setup as an optional checkbox in `install.py`.
+- [ ] **Display Profiles (Autorandr)**:
+  - Automatically detect and apply capture card mirroring profiles without manual Rofi invocation.
 
-- [x] **TUI-установщик `install.py`**:
-  - Математически ровный интерфейс без поломок границ, баннер Wu-Tang и плавные прогресс-бары для pacman.
-- [x] **Быстрое обновление `update-cream`**:
-  - Алиас и скрипт, скачивающий свежие коммиты с GitHub, обновляющий симлинки, выставляющий права и перезагружающий i3.
-- [x] **Зеркалирование на карту захвата (`display_mirror.sh`)**:
-  - Интерактивное Rofi-меню по `Alt + F7` с профилями 1080p@60Hz для карт захвата.
-- [x] **Тема для Discord (Vesktop)**:
-  - Применение аркадного пиксельного шрифта `Silkscreen` (как надпись WU-TANG в Polybar) с фоллбеком на `Terminess Nerd Font`.
-- [x] **Тема для SDDM (Shaolin Style)**:
-  - Автономная тема для дисплейного менеджера на Qt6 QML в золотом стиле Wu-Tang.
-- [x] **Виджеты рабочего стола**:
-  - Музыкальный виджет с синхронизацией текстов (LRCLIB) и монитор ресурсов (PyQt5).
+---
+
+## ✅ Completed Tasks (Changelog)
+
+- [x] **TUI Installer (`install.py`)**:
+  - Mathematically aligned box-drawing UI, Wu-Tang banner, and smooth live progress bars for pacman.
+- [x] **Quick Updater (`update-cream`)**:
+  - Global alias and script to fetch latest commits from GitHub, refresh symlinks, set permissions, and restart i3.
+- [x] **Capture Card Mirroring (`display_mirror.sh`)**:
+  - Interactive Rofi menu toggled via `Alt + F7` with dedicated 1080p@60Hz profiles for capture cards.
+- [x] **Discord (Vesktop) Theme**:
+  - Retro pixel arcade font `Silkscreen` (matching WU-TANG label on Polybar) with fallback to `Terminess Nerd Font`.
+- [x] **SDDM Theme (Shaolin Style)**:
+  - Standalone Qt6 QML display manager theme in signature Wu-Tang gold styling.
+- [x] **Desktop Widgets**:
+  - Music widget with synchronized lyrics (LRCLIB via MPRIS) and PyQt5 system performance monitor.
