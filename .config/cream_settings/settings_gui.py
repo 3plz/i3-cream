@@ -38,6 +38,11 @@ FEHBG_PATH = os.path.join(HOME, ".fehbg")
 PERF_CONFIG = os.path.join(CONFIG_DIR, "perf_widget")
 SONE_CONFIG = os.path.join(CONFIG_DIR, "sone_widget")
 
+# Wu-Tang Logo
+LOGO_PATH = os.path.join(DOTFILES, "assets", "logo.png")
+if not os.path.exists(LOGO_PATH):
+    LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png")
+
 
 # -----------------------------------------------------------------------------
 # QSS Stylesheet: Wu-Tang Cyber-Shaolin Theme
@@ -46,8 +51,8 @@ QSS_STYLE = """
 QWidget {
     background-color: #0C0C0C;
     color: #E0E0E0;
-    font-family: 'Terminess Nerd Font', 'Silkscreen', monospace;
-    font-size: 13px;
+    font-family: 'Silkscreen', 'Terminess Nerd Font', monospace;
+    font-size: 11px;
     border: none;
 }
 
@@ -71,9 +76,10 @@ QPushButton#NavBtn {
     color: #A0A0A0;
     text-align: left;
     padding: 12px 16px;
+    font-family: 'Silkscreen', 'Terminess Nerd Font', monospace;
     font-weight: bold;
     border-left: 3px solid transparent;
-    font-size: 13px;
+    font-size: 9.5px;
 }
 QPushButton#NavBtn:hover {
     background-color: #1A1A1A;
@@ -89,6 +95,8 @@ QPushButton#NavBtn:checked {
 QPushButton.PrimaryBtn {
     background-color: #FFB800;
     color: #0C0C0C;
+    font-family: 'Silkscreen', monospace;
+    font-size: 9.5px;
     font-weight: bold;
     padding: 8px 16px;
     border: none;
@@ -104,6 +112,8 @@ QPushButton.SecondaryBtn {
     background-color: #181818;
     color: #FFB800;
     border: 1px solid #FFB800;
+    font-family: 'Silkscreen', monospace;
+    font-size: 9px;
     padding: 7px 14px;
     font-weight: bold;
 }
@@ -115,6 +125,8 @@ QPushButton.DangerBtn {
     background-color: #201010;
     color: #E53935;
     border: 1px solid #E53935;
+    font-family: 'Silkscreen', monospace;
+    font-size: 9px;
     padding: 7px 14px;
     font-weight: bold;
 }
@@ -243,7 +255,7 @@ class WallpaperTab(QWidget):
         # Header
         head_layout = QHBoxLayout()
         title = QLabel("WALLPAPER MANAGER", self)
-        title.setStyleSheet("color: #FFB800; font-size: 16px; font-weight: bold;")
+        title.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-size: 13px; font-weight: bold; letter-spacing: 1px;")
         head_layout.addWidget(title)
 
         head_layout.addStretch()
@@ -367,7 +379,7 @@ class WidgetsTab(QWidget):
         layout.setSpacing(18)
 
         title = QLabel("DESKTOP WIDGETS MANAGER", self)
-        title.setStyleSheet("color: #FFB800; font-size: 16px; font-weight: bold;")
+        title.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-size: 13px; font-weight: bold; letter-spacing: 1px;")
         layout.addWidget(title)
 
         desc = QLabel(
@@ -602,7 +614,7 @@ class TouchpadTab(QWidget):
         layout.setSpacing(16)
 
         title = QLabel("TOUCHPAD & LAPTOP SETTINGS", self)
-        title.setStyleSheet("color: #FFB800; font-size: 16px; font-weight: bold;")
+        title.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-size: 13px; font-weight: bold; letter-spacing: 1px;")
         layout.addWidget(title)
 
         self.info_lbl = QLabel("Detecting touchpad...", self)
@@ -709,7 +721,7 @@ class DisplayTab(QWidget):
         layout.setSpacing(16)
 
         title = QLabel("DISPLAYS & SYSTEM ACTIONS", self)
-        title.setStyleSheet("color: #FFB800; font-size: 16px; font-weight: bold;")
+        title.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-size: 13px; font-weight: bold; letter-spacing: 1px;")
         layout.addWidget(title)
 
         # Displays Card
@@ -812,18 +824,47 @@ class AboutTab(QWidget):
     def init_ui(self):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 20, 24, 20)
-        layout.setSpacing(14)
+        layout.setSpacing(16)
 
-        banner = QLabel(
-            "   __      ____  __     _____ ___    _   _\n"
-            "   \\ \\    / / / / /    |_   _/ _ \\  | \\ | |\n"
-            "    \\ \\/\\/ / /_/ /_____  | || |_| | |  \\| |\n"
-            "     \\_/\\_/\\____/______  |_| \\___/  |_|\\___|\n"
-            "        WU-TANG CLAN // C.R.E.A.M. RICE",
-            self
+        # Header with Real Wu-Tang Logo & Silkscreen Typography
+        header_widget = QWidget(self)
+        hw_layout = QHBoxLayout(header_widget)
+        hw_layout.setContentsMargins(0, 0, 0, 0)
+        hw_layout.setSpacing(18)
+
+        # Wu-Tang Logo
+        logo_lbl = QLabel(header_widget)
+        if os.path.exists(LOGO_PATH):
+            pix = QPixmap(LOGO_PATH).scaled(72, 72, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            logo_lbl.setPixmap(pix)
+        logo_lbl.setFixedSize(72, 72)
+        hw_layout.addWidget(logo_lbl)
+
+        # Titles & Author
+        titles_col = QVBoxLayout()
+        titles_col.setSpacing(5)
+
+        title_main = QLabel("WU-TANG CLAN", header_widget)
+        title_main.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-size: 16px; font-weight: bold; letter-spacing: 1.5px;")
+        titles_col.addWidget(title_main)
+
+        title_sub = QLabel("C.R.E.A.M. RICE // ARCH LINUX", header_widget)
+        title_sub.setStyleSheet("color: #E0E0E0; font-family: 'Silkscreen', monospace; font-size: 9px; font-weight: bold;")
+        titles_col.addWidget(title_sub)
+
+        # Author badge for 3plz
+        author_badge = QLabel("AUTHOR: 3plz", header_widget)
+        author_badge.setStyleSheet(
+            "color: #0C0C0C; background-color: #FFB800; font-family: 'Silkscreen', monospace; "
+            "font-size: 9px; font-weight: bold; padding: 2px 8px;"
         )
-        banner.setStyleSheet("color: #FFB800; font-family: monospace; font-size: 11px; font-weight: bold;")
-        layout.addWidget(banner)
+        author_badge.setFixedWidth(112)
+        titles_col.addWidget(author_badge)
+
+        hw_layout.addLayout(titles_col)
+        hw_layout.addStretch()
+
+        layout.addWidget(header_widget)
 
         card = QFrame(self)
         card.setProperty("class", "CardFrame")
@@ -831,8 +872,9 @@ class AboutTab(QWidget):
         c_layout.setContentsMargins(16, 14, 16, 14)
         c_layout.setSpacing(8)
 
-        # System info
+        # System info & Author
         uname = os.uname()
+        c_layout.addWidget(self.make_info_row("Author & Creator:", "3plz"))
         c_layout.addWidget(self.make_info_row("Operating System:", f"{uname.sysname} ({uname.release})"))
         c_layout.addWidget(self.make_info_row("Node Hostname:", uname.nodename))
 
@@ -841,6 +883,7 @@ class AboutTab(QWidget):
         mem_gb = f"{mem.total / (1024**3):.1f} GB"
         c_layout.addWidget(self.make_info_row("Hardware:", f"{cpu_count} CPU Threads | {mem_gb} RAM"))
         c_layout.addWidget(self.make_info_row("Theme & Palette:", "Pitch Black (#0C0C0C) & Signature Gold (#FFB800)"))
+        c_layout.addWidget(self.make_info_row("Typography:", "Silkscreen & Terminess Nerd Font"))
         c_layout.addWidget(self.make_info_row("Window Manager:", "i3-wm (Tiling)"))
 
         layout.addWidget(card)
@@ -861,9 +904,12 @@ class AboutTab(QWidget):
         l = QHBoxLayout(row)
         l.setContentsMargins(0, 0, 0, 0)
         k = QLabel(label, row)
-        k.setStyleSheet("color: #888888; font-weight: bold; width: 140px;")
+        k.setStyleSheet("color: #888888; font-weight: bold; font-size: 11px; width: 150px;")
         v = QLabel(value, row)
-        v.setStyleSheet("color: #FFFFFF;")
+        if value == "3plz":
+            v.setStyleSheet("color: #FFB800; font-family: 'Silkscreen', monospace; font-weight: bold; font-size: 11px;")
+        else:
+            v.setStyleSheet("color: #FFFFFF; font-size: 11px;")
         l.addWidget(k)
         l.addWidget(v)
         l.addStretch()
@@ -883,6 +929,8 @@ class CreamSettingsWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Wu-Tang Control Center")
+        if os.path.exists(LOGO_PATH):
+            self.setWindowIcon(QIcon(LOGO_PATH))
         self.setFixedSize(780, 520)
         self.setStyleSheet(QSS_STYLE)
         self.init_ui()
@@ -894,19 +942,32 @@ class CreamSettingsWindow(QWidget):
 
         # Top Header Bar
         header = QFrame(self)
-        header.setFixedHeight(46)
+        header.setFixedHeight(48)
         header.setStyleSheet("background-color: #121212; border-bottom: 2px solid #FFB800;")
         h_layout = QHBoxLayout(header)
-        h_layout.setContentsMargins(16, 0, 16, 0)
+        h_layout.setContentsMargins(14, 0, 16, 0)
+        h_layout.setSpacing(10)
 
-        logo_lbl = QLabel("👐  WU-TANG CLAN // CONTROL CENTER", header)
-        logo_lbl.setStyleSheet("color: #FFB800; font-weight: bold; font-size: 13px; letter-spacing: 1px;")
+        # Wu-Tang Logo Icon in Header
+        logo_icon = QLabel(header)
+        if os.path.exists(LOGO_PATH):
+            pix = QPixmap(LOGO_PATH).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            logo_icon.setPixmap(pix)
+        logo_icon.setFixedSize(24, 24)
+        h_layout.addWidget(logo_icon)
+
+        # Title in Silkscreen font (matching Polybar WU-TANG label)
+        logo_lbl = QLabel("WU-TANG // CONTROL CENTER", header)
+        logo_lbl.setStyleSheet(
+            "color: #FFB800; font-family: 'Silkscreen', monospace; "
+            "font-size: 11px; font-weight: bold; letter-spacing: 1.5px;"
+        )
         h_layout.addWidget(logo_lbl)
 
         h_layout.addStretch()
 
         badge = QLabel("ARCH LINUX | i3WM", header)
-        badge.setStyleSheet("color: #888888; font-size: 10px; font-weight: bold;")
+        badge.setStyleSheet("color: #888888; font-family: 'Silkscreen', monospace; font-size: 8.5px; font-weight: bold;")
         h_layout.addWidget(badge)
 
         main_layout.addWidget(header)
