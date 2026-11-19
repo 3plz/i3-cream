@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-# Останавливаем все запущенные инстансы polybar
-killall -q polybar
+# Останавливаем предыдущие инстансы
+killall -q polybar 2>/dev/null || true
+pkill -x polybar 2>/dev/null || true
+sleep 0.2
 
-# Ждём, пока процессы точно завершатся
-while pgrep -u "$UID" -x polybar >/dev/null; do sleep 1; done
-
-# Запускаем бар (имя бара "main" берётся из [bar/main] в config.ini)
+# Запускаем полибар в фоне
 nohup polybar main -c "$HOME/.config/polybar/config.ini" >/dev/null 2>&1 &
+disown
+

@@ -31,6 +31,7 @@ client.urgent           #E06C75 #0C0C0C #FFFFFF #E06C75 #E06C75
 
 # Autostart
 exec --no-startup-id ~/.config/i3/scripts/autostart.sh
+exec_always --no-startup-id ~/.config/polybar/launch.sh
 exec --no-startup-id setxkbmap -layout us,ru -option grp:alt_shift_toggle
 
 # System Binds 

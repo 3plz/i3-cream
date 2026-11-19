@@ -8,7 +8,7 @@ pgrep -x dunst >/dev/null || dunst &
 
 # Wallpappers
 bash ~/.fehbg
-polybar main -c ~/.config/polybar/config.ini & disown
+bash ~/.config/polybar/launch.sh
 
 # Desktop Music Widget
 bash ~/.config/sone_widget/launch.sh
