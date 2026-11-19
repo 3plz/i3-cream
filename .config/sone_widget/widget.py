@@ -56,6 +56,18 @@ def parse_lrc(lrc_text):
     return lines
 
 
+def get_clean_env():
+    env = dict(os.environ)
+    if "DISPLAY" not in env or not env["DISPLAY"]:
+        env["DISPLAY"] = ":0"
+    if "DBUS_SESSION_BUS_ADDRESS" not in env or not env["DBUS_SESSION_BUS_ADDRESS"]:
+        uid = os.getuid()
+        bus_path = f"/run/user/{uid}/bus"
+        if os.path.exists(bus_path):
+            env["DBUS_SESSION_BUS_ADDRESS"] = f"unix:path={bus_path}"
+    return env
+
+
 class LyricsWorker(QObject):
     lyrics_ready = pyqtSignal(str, list)  # track_key, lines
 
@@ -419,8 +431,7 @@ class SoneWidget(QWidget):
         self.lower()
         try:
             wid = str(int(self.winId()))
-            env = dict(os.environ, DISPLAY=":0")
-            subprocess.run(["xdotool", "windowlower", wid], env=env, stderr=subprocess.DEVNULL)
+            subprocess.run(["xdotool", "windowlower", wid], env=get_clean_env(), stderr=subprocess.DEVNULL)
         except Exception:
             pass
         self.save_position()
@@ -432,8 +443,7 @@ class SoneWidget(QWidget):
         self.raise_()
         try:
             wid = str(int(self.winId()))
-            env = dict(os.environ, DISPLAY=":0")
-            subprocess.run(["xdotool", "windowraise", wid], env=env, stderr=subprocess.DEVNULL)
+            subprocess.run(["xdotool", "windowraise", wid], env=get_clean_env(), stderr=subprocess.DEVNULL)
         except Exception:
             pass
         self.save_position()
@@ -445,17 +455,15 @@ class SoneWidget(QWidget):
             self.lower_to_desktop()
 
     def run_playerctl(self, action):
-        env = dict(os.environ, DISPLAY=":0", DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus")
-        subprocess.Popen(["playerctl", action], env=env)
+        subprocess.Popen(["playerctl", action], env=get_clean_env())
 
     def seek_position(self, val):
         if self.duration > 0:
             target_sec = (val / 1000.0) * self.duration
-            env = dict(os.environ, DISPLAY=":0", DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus")
-            subprocess.Popen(["playerctl", "position", str(target_sec)], env=env)
+            subprocess.Popen(["playerctl", "position", str(target_sec)], env=get_clean_env())
 
     def update_state(self):
-        env = dict(os.environ, DISPLAY=":0", DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus")
+        env = get_clean_env()
         cmd = [
             "playerctl", "metadata",
             "--format", "{{status}}|||{{artist}}|||{{title}}|||{{album}}|||{{mpris:artUrl}}|||{{position}}|||{{mpris:length}}"
@@ -596,8 +604,7 @@ class SoneWidget(QWidget):
         if getattr(self, "is_lowered", False):
             try:
                 wid = str(int(self.winId()))
-                env = dict(os.environ, DISPLAY=":0")
-                subprocess.run(["xdotool", "windowlower", wid], env=env, stderr=subprocess.DEVNULL)
+                subprocess.run(["xdotool", "windowlower", wid], env=get_clean_env(), stderr=subprocess.DEVNULL)
             except Exception:
                 pass
 

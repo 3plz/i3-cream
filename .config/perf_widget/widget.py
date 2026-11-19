@@ -625,7 +625,9 @@ class PerfWidget(QWidget):
         self.lower()
         try:
             wid = str(int(self.winId()))
-            env = dict(os.environ, DISPLAY=":0")
+            env = dict(os.environ)
+            if "DISPLAY" not in env or not env["DISPLAY"]:
+                env["DISPLAY"] = ":0"
             subprocess.run(["xdotool", "windowlower", wid], env=env, stderr=subprocess.DEVNULL)
         except Exception:
             pass
@@ -638,7 +640,9 @@ class PerfWidget(QWidget):
         self.raise_()
         try:
             wid = str(int(self.winId()))
-            env = dict(os.environ, DISPLAY=":0")
+            env = dict(os.environ)
+            if "DISPLAY" not in env or not env["DISPLAY"]:
+                env["DISPLAY"] = ":0"
             subprocess.run(["xdotool", "windowraise", wid], env=env, stderr=subprocess.DEVNULL)
         except Exception:
             pass
@@ -672,7 +676,9 @@ class PerfWidget(QWidget):
         if getattr(self, "is_lowered", False):
             try:
                 wid = str(int(self.winId()))
-                env = dict(os.environ, DISPLAY=":0")
+                env = dict(os.environ)
+                if "DISPLAY" not in env or not env["DISPLAY"]:
+                    env["DISPLAY"] = ":0"
                 subprocess.run(["xdotool", "windowlower", wid], env=env, stderr=subprocess.DEVNULL)
             except Exception:
                 pass
